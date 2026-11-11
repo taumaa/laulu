@@ -29,9 +29,12 @@ const freqToMidi = f => 69 + 12 * Math.log2(f / a4());
 const pcOf = m => ((Math.round(m) % 12) + 12) % 12;
 const pitchClass = f => pcOf(freqToMidi(f));
 const noteName = m => NOTE_NAMES[pcOf(m)] + (Math.floor(Math.round(m) / 12) - 1);
-const ordinal = n => n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[n] || 'th');
-const stringLabel = i => `${ordinal(6 - i)} string`;
-const fmtCents = c => `${c > 0 ? '+' : ''}${Math.round(c)} cents`;
+// String i (0 = the low 6th string) in Finnish: "6. kieli", and "6. kielellä" (on the 6th string).
+const stringLabel = i => `${6 - i}. kieli`;
+const stringOn = i => `${6 - i}. kielellä`;
+const fmtHz = f => f.toFixed(1).replace(".", ",") + " Hz";
+const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
+const fmtCents = c => `${c > 0 ? '+' : ''}${Math.round(c)} senttiä`;
 const randInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const median = arr => { const s = [...arr].sort((a, b) => a - b); const k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };

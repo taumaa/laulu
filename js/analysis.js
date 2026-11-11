@@ -88,6 +88,12 @@ const CHORD_MIN_SCORE = 1.2;     // weaker matches are not reported at all
 const CHORD_ALT_MARGIN = 0.9;    // other names within this score of the best are listed as alternatives
 const CHORD_MAX_RESULTS = 6;
 
+// "D-duuri", "A-molliseptimisointu", or "D-sointu, pidätetty sekunti" for names that don't take a hyphen.
+function chordDescription(root, type) {
+  const name = type.name;
+  return /^(pidätetty|seksti)/.test(name) ? `${NOTE_NAMES[root]}-sointu, ${name}` : `${NOTE_NAMES[root]}-${name}`;
+}
+
 // Returns every chord name that fits the heard pitch classes, best first.
 // The same notes often have several names: D A B E is E7sus4, Asus2sus4, D6sus2 or Bm7add11.
 function matchChords(chromaVec, bassPc) {
@@ -127,7 +133,7 @@ function matchChords(chromaVec, bassPc) {
       found.push({
         root, type, typeIndex, score, members, heard, noFifth,
         label: NOTE_NAMES[root] + type.suffix + (slash ? '/' + NOTE_NAMES[bassPc] : ''),
-        description: `${NOTE_NAMES[root]} ${type.name}` + (noFifth ? ', no 5th' : '') + (slash ? `, ${NOTE_NAMES[bassPc]} in the bass` : ''),
+        description: chordDescription(root, type) + (noFifth ? ', ei kvinttiä' : '') + (slash ? `, bassossa ${NOTE_NAMES[bassPc]}` : ''),
       });
     }
   });

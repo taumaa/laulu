@@ -16,7 +16,7 @@ const range = (() => {
     const known = low !== null && high !== null && high > low;
     if (known) {
       const semis = high - low;
-      $('rgSummary').textContent = `Your range: ${noteName(low)} – ${noteName(high)} (${semis} semitones, ${(semis / 12).toFixed(1)} octaves).`;
+      $('rgSummary').textContent = `Äänialasi: ${noteName(low)} – ${noteName(high)} (${semis} puolisävelaskelta, ${(semis / 12).toFixed(1).replace('.', ',')} oktaavia).`;
     } else {
       $('rgSummary').textContent = '';
     }
@@ -37,16 +37,16 @@ const range = (() => {
   $('rgHighDown').addEventListener('click', nudge('high', -1));
   $('rgHighUp').addEventListener('click', nudge('high', 1));
   $('rgStart').addEventListener('click', () => {
-    if (!mic.analyser) { $('rgSummary').textContent = 'Press "Start listening" first.'; return; }
+    if (!mic.analyser) { $('rgSummary').textContent = 'Paina ensin "Aloita kuuntelu".'; return; }
     listening = !listening;
     hold.reset();
-    $('rgStart').textContent = listening ? 'Stop' : 'Start';
+    $('rgStart').textContent = listening ? 'Lopeta' : 'Aloita';
   });
   $('rgReset').addEventListener('click', () => { low = high = null; render(); });
   $('rgSave').addEventListener('click', () => {
-    if (low === null || high === null || high <= low) { $('rgSummary').textContent = 'Sing a low note and a high note first.'; return; }
+    if (low === null || high === null || high <= low) { $('rgSummary').textContent = 'Laula ensin matala ja korkea sävel.'; return; }
     store.set('range', { low, high });
-    $('rgSummary').textContent += ' Saved.';
+    $('rgSummary').textContent += ' Tallennettu.';
   });
   render();
 

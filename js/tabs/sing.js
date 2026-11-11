@@ -32,8 +32,8 @@ const sing = (() => {
     s.phase = 'reference';
     s.refEnds = performance.now() / 1000 + secs + 0.3;
     $('sgTarget').textContent = noteName(target);
-    $('sgProgress').textContent = `Note ${s.i + 1} of ${s.targets.length}`;
-    fb('Listen…');
+    $('sgProgress').textContent = `Sävel ${s.i + 1}/${s.targets.length}`;
+    fb('Kuuntele…');
     resetZone();
   }
 
@@ -41,13 +41,13 @@ const sing = (() => {
     const target = s.targets[s.i];
     if (skipped) {
       s.results.push({ target, skipped: true });
-      fb('Skipped.', 'warn');
+      fb('Ohitettu.', 'warn');
     } else {
       const avg = mean(s.errors.map(Math.abs));
       const sd = stdDev(s.errors);
       const score = Math.max(0, Math.min(100, Math.round(100 - avg * 1.5 - sd - Math.max(0, s.firstHit - 1) * 5)));
       s.results.push({ target, avg, sd, found: s.firstHit, score });
-      fb(`Well done! ${Math.round(avg)} cents off on average.`, 'good');
+      fb(`Hienoa! Keskimäärin ${Math.round(avg)} senttiä sivussa.`, 'good');
     }
     renderResults();
     s.phase = 'pause';
@@ -60,19 +60,19 @@ const sing = (() => {
       s.phase = 'done';
       const scored = s.results.filter(r => !r.skipped);
       const overall = scored.length ? Math.round(mean(scored.map(r => r.score))) : 0;
-      fb(`Finished! Overall score: ${overall} / 100.`, 'good');
+      fb(`Valmis! Kokonaispisteet: ${overall}/100.`, 'good');
       $('sgTarget').textContent = '–';
-      $('sgStart').textContent = 'Start';
+      $('sgStart').textContent = 'Aloita';
       return;
     }
     playRef();
   }
 
   function renderResults() {
-    const rows = !s.results.length ? '<tr><td class="placeholder" colspan="5">Your results for each note appear here.</td></tr>' : s.results.map(r => r.skipped
-      ? `<tr><td>${noteName(r.target)}</td><td colspan="4">skipped</td></tr>`
-      : `<tr><td>${noteName(r.target)}</td><td>${Math.round(r.avg)} cents</td><td>±${Math.round(r.sd)} cents</td><td>${r.found.toFixed(1)} s</td><td>${r.score}</td></tr>`).join('');
-    $('sgResults').innerHTML = `<table class="results"><thead><tr><th>Note</th><th>Average error</th><th>Steadiness</th><th>Time to find</th><th>Score</th></tr></thead><tbody>${rows}</tbody></table>`;
+    const rows = !s.results.length ? '<tr><td class="placeholder" colspan="5">Tulokset jokaisesta sävelestä näkyvät tässä.</td></tr>' : s.results.map(r => r.skipped
+      ? `<tr><td>${noteName(r.target)}</td><td colspan="4">ohitettu</td></tr>`
+      : `<tr><td>${noteName(r.target)}</td><td>${Math.round(r.avg)} senttiä</td><td>±${Math.round(r.sd)} senttiä</td><td>${r.found.toFixed(1).replace('.', ',')} s</td><td>${r.score}</td></tr>`).join('');
+    $('sgResults').innerHTML = `<table class="results"><thead><tr><th>Sävel</th><th>Keskivirhe</th><th>Vakaus</th><th>Löytymisaika</th><th>Pisteet</th></tr></thead><tbody>${rows}</tbody></table>`;
     const box = $('sgResults');
     box.scrollTop = box.scrollHeight;
   }
@@ -80,16 +80,16 @@ const sing = (() => {
   $('sgStart').addEventListener('click', () => {
     if (s.phase !== 'idle' && s.phase !== 'done') {
       s.phase = 'idle';
-      $('sgStart').textContent = 'Start';
-      fb('Stopped.');
+      $('sgStart').textContent = 'Aloita';
+      fb('Pysäytetty.');
       return;
     }
-    if (!mic.analyser) { fb('Press "Start listening" first.', 'warn'); return; }
+    if (!mic.analyser) { fb('Paina ensin "Aloita kuuntelu".', 'warn'); return; }
     s.targets = buildTargets();
     s.i = 0;
     s.results = [];
     renderResults();
-    $('sgStart').textContent = 'Stop';
+    $('sgStart').textContent = 'Lopeta';
     playRef();
   });
   $('sgReplay').addEventListener('click', () => { if (s.phase === 'listening' || s.phase === 'reference') playRef(); });
@@ -114,7 +114,7 @@ const sing = (() => {
         s.listenStart = f.time;
         s.firstHit = null;
         resetZone();
-        fb('Your turn: sing the note.');
+        fb('Sinun vuorosi: laula sävel.');
       }
       if (s.phase !== 'listening') return;
       if (f.time - s.listenStart > 15) { finishNote(f.time, true); return; }
@@ -132,13 +132,13 @@ const sing = (() => {
         s.errors.push(cents);
         const held = f.time - s.inZoneSince;
         $('sgHold').style.width = Math.min(100, (100 * held) / HOLD_TARGET) + '%';
-        fb('Good – hold it…', 'good');
+        fb('Hyvä – pidä se…', 'good');
         if (held >= HOLD_TARGET) finishNote(f.time, false);
       } else {
         if (s.inZoneSince !== null && f.time - s.lastInZone > 0.25) resetZone();
         const semis = Math.round(Math.abs(cents) / 100);
-        const far = semis >= 2 ? ` (about ${semis} semitones)` : '';
-        fb(cents < 0 ? `Too low ↑ Go up${far}` : `Too high ↓ Go down${far}`, 'warn');
+        const far = semis >= 2 ? ` (noin ${semis} puolisävelaskelta)` : '';
+        fb(cents < 0 ? `Liian matala ↑ Nouse${far}` : `Liian korkea ↓ Laske${far}`, 'warn');
       }
     },
   };

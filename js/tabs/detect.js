@@ -81,20 +81,20 @@ const detect = (() => {
       slot.title = c ? `${c.label}: ${c.description}` : '';
     });
     $('detCandsNote').textContent = !shown
-      ? 'Strum a chord. Every chord name that fits the notes is listed here, best match first.'
-      : cands.length > 1 ? 'These names all fit the notes you played. Tap a name to see its chord diagram.'
-        : cands.length === 1 ? 'Only one chord name fits these notes.'
-          : shown.kind === 'Single note' ? 'That is a single note. Strum a chord to see its names.' : 'No chord detected.';
+      ? 'Soita sointu. Kaikki sävelille sopivat sointunimet näkyvät tässä, paras ensin.'
+      : cands.length > 1 ? 'Kaikki nämä nimet sopivat soittamiisi säveliin. Napauta nimeä nähdäksesi sointukaavion.'
+        : cands.length === 1 ? 'Näille sävelille sopii vain yksi sointunimi.'
+          : shown.kind === 'Yksittäinen sävel' ? 'Tuo on yksittäinen sävel. Soita sointu nähdäksesi sen nimet.' : 'Sointua ei tunnistettu.';
 
     const shape = focus ? CHORD_SHAPES[focus.label.split('/')[0]] : null;
     if (shape) $('detDiagram').innerHTML = chordDiagramSvg(shape);
-    else $('detDiagram').innerHTML = focus ? `<div class="diagram-empty">No diagram for ${focus.label.split('/')[0]} yet</div>` : '';
+    else $('detDiagram').innerHTML = focus ? `<div class="diagram-empty">Soinnulle ${focus.label.split('/')[0]} ei ole vielä kaaviota</div>` : '';
   }
 
   function renderRecent() {
     $('detRecent').innerHTML = recent.map((label, i) =>
       `<span class="chip${i === 0 ? ' ok' : ''}">${label}</span>`).join('') ||
-      '<span class="placeholder">Chords you play appear here.</span>';
+      '<span class="placeholder">Soittamasi soinnut näkyvät tässä.</span>';
   }
 
   function addRecent(label) {
@@ -118,13 +118,13 @@ const detect = (() => {
     $('detTunerNote').textContent = info.name + info.octave;
     setNeedle($('detNeedle'), info.cents);
     const stringIdx = STANDARD.indexOf(info.midi);
-    const stringName = stringIdx >= 0 ? ' · open ' + stringLabel(stringIdx) : '';
-    $('detTunerInfo').textContent = `${pitch.freq.toFixed(1)} Hz · ${fmtCents(info.cents)}${stringName}`;
+    const stringName = stringIdx >= 0 ? ' · avoin ' + stringLabel(stringIdx) : '';
+    $('detTunerInfo').textContent = `${fmtHz(pitch.freq)} · ${fmtCents(info.cents)}${stringName}`;
   }
 
   function renderChips(notes) {
     $('detChips').innerHTML = notes.map((n, i) =>
-      `<span class="chip${i === 0 ? ' bass' : ''}" title="${n.freq.toFixed(1)} Hz">${noteName(freqToMidi(n.freq))}</span>`).join('');
+      `<span class="chip${i === 0 ? ' bass' : ''}" title="${fmtHz(n.freq)}">${noteName(freqToMidi(n.freq))}</span>`).join('');
   }
 
   // Shows a result only after it wins most of the recent frames.
@@ -139,7 +139,7 @@ const detect = (() => {
     const latest = history.findLast(c => c && c.label === winner);
     if (!shown || shown.label !== latest.label) focusLabel = null;
     shown = latest;
-    if (latest.kind === 'Chord') addRecent(latest.label);
+    if (latest.kind === 'Sointu') addRecent(latest.label);
     renderResult();
   }
 
@@ -180,12 +180,12 @@ const detect = (() => {
 
       let candidate = null;
       if (chord && (mode === 'chord' || !isClearNote)) {
-        candidate = { kind: 'Chord', label: chord.label, sub: chord.description, candidates: names };
+        candidate = { kind: 'Sointu', label: chord.label, sub: chord.description, candidates: names };
       } else if (mode !== 'chord') {
         const freq = f.pitch && f.pitch.clarity > 0.8 ? f.pitch.freq : f.notes[0]?.freq;
         if (freq) {
           const info = noteInfo(freq);
-          candidate = { kind: 'Single note', label: info.name + info.octave, sub: `${freq.toFixed(1)} Hz`, candidates: [] };
+          candidate = { kind: 'Yksittäinen sävel', label: info.name + info.octave, sub: `${fmtHz(freq)}`, candidates: [] };
         }
       }
       const focus = focused();

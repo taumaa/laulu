@@ -44,10 +44,10 @@ const tuner = (() => {
     onFrame(f) {
       const ms = strings();
       const m = f.smoothMidi;
-      if (done.size === ms.length) { hint('All strings are in tune.', 'good'); return; }
+      if (done.size === ms.length) { hint('Kaikki kielet ovat vireessä.', 'good'); return; }
       if (m === null) {
         inTuneSince = null;
-        if (!f.muted) hint(guided() ? `Play the ${stringLabel(current)} (${noteName(ms[current])}) on its own.` : 'Play any open string.');
+        if (!f.muted) hint(guided() ? `Soita pelkkä ${stringLabel(current)} (${noteName(ms[current])}).` : 'Soita mikä tahansa avoin kieli.');
         return;
       }
       if (!guided()) {
@@ -60,16 +60,16 @@ const tuner = (() => {
       if (Math.abs(cents) > 600) cents = ((cents % 1200) + 1800) % 1200 - 600;   // octave error from the pitch tracker
       $('tunNote').textContent = noteName(target);
       setNeedle($('tunNeedle'), cents);
-      $('tunInfo').textContent = `${stringLabel(current)} · you play ${f.pitch.freq.toFixed(1)} Hz · target ${midiToFreq(target).toFixed(1)} Hz · ${fmtCents(cents)}`;
+      $('tunInfo').textContent = `${stringLabel(current)} · soitat ${fmtHz(f.pitch.freq)} · tavoite ${fmtHz(midiToFreq(target))} · ${fmtCents(cents)}`;
 
       if (guided() && Math.abs(cents) > 300) {
         inTuneSince = null;
-        hint(`That sounds like another string. Play the ${stringLabel(current)} (${noteName(target)}).`, 'warn');
+        hint(`Tuo kuulostaa toiselta kieleltä. Soita ${stringLabel(current)} (${noteName(target)}).`, 'warn');
         return;
       }
       if (Math.abs(cents) <= 5) {
         if (inTuneSince === null) inTuneSince = f.time;
-        hint('In tune – let it ring…', 'good');
+        hint('Vireessä – anna soida…', 'good');
         if (f.time - inTuneSince >= 1 && !done.has(current)) {
           done.add(current);
           inTuneSince = null;
@@ -83,9 +83,9 @@ const tuner = (() => {
       }
       inTuneSince = null;
       const semis = Math.round(Math.abs(cents) / 100);
-      const far = semis >= 1 ? ` (about ${semis} semitone${semis > 1 ? 's' : ''})` : '';
-      if (cents < 0) hint(`Too low ↑ Tighten the string${far}`, 'warn');
-      else hint(`Too high ↓ Loosen the string${far}`, 'warn');
+      const far = semis >= 1 ? ` (noin ${semis} puolisävelaskel${semis > 1 ? 'ta' : ''})` : '';
+      if (cents < 0) hint(`Liian matala ↑ Kiristä kieltä${far}`, 'warn');
+      else hint(`Liian korkea ↓ Löysää kieltä${far}`, 'warn');
     },
   };
 })();

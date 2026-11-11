@@ -16,7 +16,7 @@ const fretboard = (() => {
 
   function redraw() {
     const t = tuning();
-    let s = `<svg viewBox="0 0 ${FB.w} ${FB.h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Guitar fretboard">`;
+    let s = `<svg viewBox="0 0 ${FB.w} ${FB.h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kitaran otelauta">`;
     const midY = (a, b) => (fy(a) + fy(b)) / 2;
     for (const f of [3, 5, 7, 9, 15]) s += `<circle cx="${fx(f)}" cy="${midY(2, 3)}" r="7" fill="#2a2f3a"/>`;
     s += `<circle cx="${fx(12)}" cy="${midY(1, 2)}" r="7" fill="#2a2f3a"/><circle cx="${fx(12)}" cy="${midY(3, 4)}" r="7" fill="#2a2f3a"/>`;
@@ -69,7 +69,7 @@ const fretboard = (() => {
 
   function newTarget() {
     const strings = [...document.querySelectorAll('#fbStrings input:checked')].map(el => Number(el.dataset.string));
-    if (!strings.length) { fb('Select at least one string.', 'warn'); return; }
+    if (!strings.length) { fb('Valitse ainakin yksi kieli.', 'warn'); return; }
     const t = tuning();
     const options = [];
     for (const i of strings) {
@@ -83,13 +83,13 @@ const fretboard = (() => {
     }
     game.target = target;
     hold.reset();
-    $('fbPrompt').textContent = `Play ${NOTE_NAMES[pcOf(target.midi)]} on the ${stringLabel(target.string)}`;
+    $('fbPrompt').textContent = `Soita ${NOTE_NAMES[pcOf(target.midi)]} ${stringOn(target.string)}`;
     fb('');
     renderScore();
   }
 
   function renderScore() {
-    $('fbScore').textContent = `Score: ${game.score} · streak: ${game.streak} · best streak: ${game.best}`;
+    $('fbScore').textContent = `Pisteet: ${game.score} · putki: ${game.streak} · paras putki: ${game.best}`;
   }
 
   $('fbShowAll').addEventListener('change', () => $('fbBoard').classList.toggle('show-all', $('fbShowAll').checked));
@@ -97,23 +97,23 @@ const fretboard = (() => {
     if (game.running) {
       game.running = false;
       game.target = null;
-      $('fbStart').textContent = 'Start game';
+      $('fbStart').textContent = 'Aloita peli';
       $('fbPrompt').textContent = '';
       fb('');
       return;
     }
-    if (!mic.analyser) { fb('Press "Start listening" first.', 'warn'); return; }
+    if (!mic.analyser) { fb('Paina ensin "Aloita kuuntelu".', 'warn'); return; }
     game.running = true;
     game.score = 0;
     game.streak = 0;
-    $('fbStart').textContent = 'Stop game';
+    $('fbStart').textContent = 'Lopeta peli';
     newTarget();
   });
   $('fbSkip').addEventListener('click', () => {
     if (!game.running) return;
     game.streak = 0;
     revealUntil = performance.now() / 1000 + 2;
-    fb(`Here it is: ${stringLabel(game.target.string)}, ${game.target.fret === 0 ? 'open' : 'fret ' + game.target.fret}.`, 'warn');
+    fb(`Tässä: ${stringLabel(game.target.string)}, ${game.target.fret === 0 ? 'avoin' : game.target.fret + '. nauha'}.`, 'warn');
     marks();
     setTimeout(() => game.running && newTarget(), 2000);
   });
@@ -137,18 +137,18 @@ const fretboard = (() => {
         game.streak++;
         if (game.streak > game.best) { game.best = game.streak; store.set('fretBest', game.best); }
         revealUntil = f.time + 0.8;
-        fb('Correct!', 'good');
+        fb('Oikein!', 'good');
         renderScore();
         marks();
         const t = game.target;
         setTimeout(() => { if (game.running && game.target === t) newTarget(); }, 800);
       } else if (pcOf(held) === pcOf(game.target.midi)) {
         game.streak = 0;
-        fb(`Right note name, wrong place. Find it on the ${stringLabel(game.target.string)}.`, 'warn');
+        fb(`Oikea sävel, väärä paikka. Etsi se ${stringOn(game.target.string)}.`, 'warn');
         renderScore();
       } else {
         game.streak = 0;
-        fb(`That was ${noteName(held)}. Try again.`, 'badc');
+        fb(`Tuo oli ${noteName(held)}. Yritä uudelleen.`, 'badc');
         renderScore();
       }
     },

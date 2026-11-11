@@ -40,7 +40,7 @@ const ear = (() => {
     const diff = easy() ? 'easy' : 'all';
     if (lv === 'note') return NOTE_NAMES.filter((_, pc) => !easy() || NATURAL[pc]);
     if (lv === 'interval') return INTERVAL_SETS[diff].map(i => INTERVALS[i]);
-    return CHORD_SETS_EAR[diff].map(n => chordType(n).name);
+    return CHORD_SETS_EAR[diff].map(n => capitalize(chordType(n).name));
   }
 
   // The buttons are drawn as soon as the settings change, disabled until there is a question,
@@ -59,21 +59,21 @@ const ear = (() => {
       let m = randInt(lo, hi);
       while (easy() && !NATURAL[pcOf(m)]) m = randInt(lo, hi);
       q = { level: lv, notes: [m], ref: m - pcOf(m), answer: NOTE_NAMES[pcOf(m)] };
-      $('erPrompt').textContent = echo() ? 'Sing or play the note back.' : 'First you hear a C, then the mystery note. Which note is it?';
+      $('erPrompt').textContent = echo() ? 'Laula tai soita sävel takaisin.' : 'Ensin kuulet C:n, sitten arvoitussävelen. Mikä sävel se on?';
     } else if (lv === 'interval') {
       const set = INTERVAL_SETS[easy() ? 'easy' : 'all'];
       const semis = pick(set);
       const root = randInt(lo, Math.max(lo, hi - semis));
       q = { level: lv, notes: [root, root + semis], semis, answer: INTERVALS[semis] };
-      $('erPrompt').textContent = echo() ? 'Sing or play both notes back: first the low note, then the high note.' : 'Which interval is it?';
+      $('erPrompt').textContent = echo() ? 'Laula tai soita molemmat sävelet takaisin: ensin matala, sitten korkea.' : 'Mikä intervalli se on?';
     } else {
       const type = chordType(pick(CHORD_SETS_EAR[easy() ? 'easy' : 'all']));
       const root = randInt(48, 57);
       q = {
         level: lv, notes: [...type.intervals.map(i => root + i), root + 12], pcs: new Set(type.intervals.map(i => (root + i) % 12)),
-        answer: type.name, label: NOTE_NAMES[pcOf(root)] + type.suffix,
+        answer: capitalize(type.name), label: NOTE_NAMES[pcOf(root)] + type.suffix,
       };
-      $('erPrompt').textContent = echo() ? 'Play the same chord back on the guitar.' : 'Which type of chord is it?';
+      $('erPrompt').textContent = echo() ? 'Soita sama sointu kitaralla.' : 'Minkä tyyppinen sointu se on?';
     }
     q.firstTry = true;
     q.solved = false;
@@ -103,17 +103,17 @@ const ear = (() => {
   }
 
   function renderScore() {
-    $('erScore').textContent = `Score: ${score.right} / ${score.total} · streak: ${score.streak} · best streak: ${store.get('earBest.' + level(), 0)}`;
+    $('erScore').textContent = `Pisteet: ${score.right}/${score.total} · putki: ${score.streak} · paras putki: ${store.get('earBest.' + level(), 0)}`;
   }
 
   $('erNew').addEventListener('click', () => {
-    if (echo() && !mic.analyser) { fb('Press "Start listening" first, or answer by choosing the name.', 'warn'); return; }
+    if (echo() && !mic.analyser) { fb('Paina ensin "Aloita kuuntelu" tai vastaa valitsemalla nimi.', 'warn'); return; }
     newQuestion();
   });
   $('erReplay').addEventListener('click', play);
   $('erReveal').addEventListener('click', () => {
     if (!q) return;
-    grade(false, `The answer: ${answerText()}.`);
+    grade(false, `Vastaus: ${answerText()}.`);
     q.solved = true;
     renderAnswers();
   });
@@ -121,10 +121,10 @@ const ear = (() => {
     const btn = e.target.closest('button[data-answer]');
     if (!btn || !q) return;
     const correct = btn.dataset.answer === q.answer;
-    grade(correct, correct ? `Correct! ${answerText()}.` : 'Not quite. Try again, or press "Show answer".');
+    grade(correct, correct ? `Oikein! ${answerText()}.` : 'Ei ihan. Yritä uudelleen tai paina "Näytä vastaus".');
   });
-  ['erLevel', 'erDifficulty', 'erAnswer'].forEach(id => $(id).addEventListener('change', () => { q = null; renderAnswers(); $('erPrompt').textContent = 'Press "New question".'; renderScore(); }));
-  $('erPrompt').textContent = 'Press "New question".';
+  ['erLevel', 'erDifficulty', 'erAnswer'].forEach(id => $(id).addEventListener('change', () => { q = null; renderAnswers(); $('erPrompt').textContent = 'Paina "Uusi kysymys".'; renderScore(); }));
+  $('erPrompt').textContent = 'Paina "Uusi kysymys".';
   renderAnswers();
   renderScore();
 
@@ -137,10 +137,10 @@ const ear = (() => {
         if (pendingOnset === null || f.time - pendingOnset < CHROMA_LAG || !f.audible) return;
         const check = checkPitchClasses(chroma, q.pcs);
         okFrames = check.ok ? okFrames + 1 : 0;
-        if (okFrames >= 8) grade(true, `Correct! ${answerText()}.`);
+        if (okFrames >= 8) grade(true, `Oikein! ${answerText()}.`);
         else if (f.time - pendingOnset > 1.2) {
           const heard = matchChord(chroma, f.bassPc);
-          grade(false, heard ? `You played ${heard.label}. Listen again and try once more.` : 'That was not the same chord. Listen again and try once more.');
+          grade(false, heard ? `Soitit ${heard.label}. Kuuntele uudelleen ja yritä vielä.` : 'Tuo ei ollut sama sointu. Kuuntele uudelleen ja yritä vielä.');
           pendingOnset = null;
         }
         return;
@@ -148,20 +148,20 @@ const ear = (() => {
       const held = hold.update(f.time, f.smoothMidi);
       if (held === null) return;
       if (q.level === 'note') {
-        if (pcOf(held) === pcOf(q.notes[0])) grade(true, `Correct! It was ${NOTE_NAMES[pcOf(held)]}.`);
-        else grade(false, `You sang ${NOTE_NAMES[pcOf(held)]}. Listen again and try once more.`);
+        if (pcOf(held) === pcOf(q.notes[0])) grade(true, `Oikein! Se oli ${NOTE_NAMES[pcOf(held)]}.`);
+        else grade(false, `Lauloit ${NOTE_NAMES[pcOf(held)]}. Kuuntele uudelleen ja yritä vielä.`);
         return;
       }
       if (stage === 0) {
-        if (pcOf(held) === pcOf(q.notes[0])) { stage = 1; firstSung = held; fb('Good. Now the second note.', 'good'); }
-        else grade(false, `The first note was not ${NOTE_NAMES[pcOf(held)]}. Listen again.`);
+        if (pcOf(held) === pcOf(q.notes[0])) { stage = 1; firstSung = held; fb('Hyvä. Nyt toinen sävel.', 'good'); }
+        else grade(false, `Ensimmäinen sävel ei ollut ${NOTE_NAMES[pcOf(held)]}. Kuuntele uudelleen.`);
         return;
       }
       const sungInterval = held - firstSung;
-      if (sungInterval === q.semis) grade(true, `Correct! ${answerText()}.`);
+      if (sungInterval === q.semis) grade(true, `Oikein! ${answerText()}.`);
       else {
-        const name = Math.abs(sungInterval) <= 12 ? INTERVALS[Math.abs(sungInterval)].toLowerCase() : 'larger interval';
-        grade(false, `You sang a ${name}${sungInterval < 0 ? ' down' : ''}. Try again from the first note.`);
+        const name = Math.abs(sungInterval) <= 12 ? INTERVALS[Math.abs(sungInterval)].toLowerCase() : 'suurempi intervalli';
+        grade(false, `Lauloit: ${name}${sungInterval < 0 ? ' alaspäin' : ''}. Yritä uudelleen ensimmäisestä sävelestä.`);
         stage = 0;
       }
     },

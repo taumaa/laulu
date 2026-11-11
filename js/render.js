@@ -9,9 +9,9 @@ function chordDiagramSvg(shape) {
   const W = left + sx * 5 + 20, H = top + sy * frets + 30;
   const xOf = i => left + i * sx;
   const yOf = f => top + (f - base + 0.5) * sy;
-  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chord diagram">`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sointukaavio">`;
   if (base === 1) s += `<rect x="${left - 1}" y="${top - 5}" width="${sx * 5 + 2}" height="5" fill="#e8eaf0"/>`;
-  else s += `<text x="${left - 8}" y="${top + sy * 0.65}" fill="#8a90a0" font-size="12" text-anchor="end">${base}fr</text>`;
+  else s += `<text x="${left - 8}" y="${top + sy * 0.65}" fill="#8a90a0" font-size="12" text-anchor="end">${base}. n</text>`;
   for (let i = 0; i <= frets; i++) s += `<line x1="${left}" x2="${left + sx * 5}" y1="${top + i * sy}" y2="${top + i * sy}" stroke="#555b69" stroke-width="1.5"/>`;
   for (let i = 0; i < 6; i++) s += `<line x1="${xOf(i)}" x2="${xOf(i)}" y1="${top}" y2="${top + frets * sy}" stroke="#8a90a0" stroke-width="1.5"/>`;
 
@@ -40,7 +40,7 @@ function keyboardSvg(from, to, low, high, now) {
   const W = 1000, H = 130, ww = W / whites.length, bw = ww * 0.6, bh = 80;
   const inRange = m => (low !== null && high !== null) ? m >= low && m <= high : (m === low || m === high);
   const fill = (m, black) => m === now ? '#f6ad55' : inRange(m) ? (black ? '#2c8f6f' : '#4fd1a5') : (black ? '#111' : '#e8eaf0');
-  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Piano keyboard">`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pianon koskettimisto">`;
   whites.forEach((m, i) => {
     s += `<rect x="${i * ww}" y="0" width="${ww}" height="${H}" fill="${fill(m, false)}" stroke="#0f1115"/>`;
     if (pcOf(m) === 0) s += `<text x="${i * ww + ww / 2}" y="${H - 8}" fill="#333" font-size="12" text-anchor="middle">${noteName(m)}</text>`;
@@ -134,7 +134,7 @@ function drawSpectrum(canvas, spectrum, peaks) {
   for (const f of [82.4, 110, 146.8, 196, 246.9, 329.6, 440, 880, 1760]) {
     const x = xOf(f);
     g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
-    g.fillText(f < 1000 ? Math.round(f) : (f / 1000).toFixed(2) + 'k', x + 3, h - 4);
+    g.fillText(f < 1000 ? Math.round(f) : (f / 1000).toFixed(2).replace('.', ',') + 'k', x + 3, h - 4);
   }
   if (!spectrum || !mic.analyser) return;
 

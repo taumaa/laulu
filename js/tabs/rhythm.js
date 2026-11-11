@@ -27,14 +27,14 @@ function metroStart() {
   metro.running = true;
   metroSchedule();
   metro.timer = setInterval(metroSchedule, 25);
-  $('rhToggle').textContent = 'Stop metronome';
+  $('rhToggle').textContent = 'Pysäytä metronomi';
   $('rhToggle').classList.add('stop');
 }
 
 function metroStop() {
   clearInterval(metro.timer);
   metro.running = false;
-  $('rhToggle').textContent = 'Start metronome';
+  $('rhToggle').textContent = 'Käynnistä metronomi';
   $('rhToggle').classList.remove('stop');
 }
 
@@ -45,7 +45,7 @@ const rhythm = (() => {
   let lastBeatShown = -1;
 
   function renderLatency() {
-    $('rhLatency').textContent = `Microphone delay: ${Math.round(latency * 1000)} ms`;
+    $('rhLatency').textContent = `Mikrofonin viive: ${Math.round(latency * 1000)} ms`;
   }
 
   function nearestGrid(t) {
@@ -69,9 +69,11 @@ const rhythm = (() => {
     g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.stroke();
     g.fillStyle = '#8a90a0';
     g.font = '12px system-ui';
-    g.fillText('early', 8, 16);
-    g.fillText('late', w - 34, 16);
-    g.fillText('on the beat', w / 2 + 6, 16);
+    g.fillText('aikaisin', 8, 16);
+    g.textAlign = 'right';
+    g.fillText('myöhässä', w - 8, 16);
+    g.textAlign = 'left';
+    g.fillText('tahdissa', w / 2 + 6, 16);
     hits.forEach((hit, idx) => {
       const age = hits.length - 1 - idx;
       const y = h - 14 - (age / 20) * (h - 34);
@@ -87,10 +89,10 @@ const rhythm = (() => {
     if (!hits.length) { $('rhStats').textContent = ''; return; }
     const onBeat = hits.filter(o => Math.abs(o) <= 40).length;
     const avg = mean(hits);
-    let tendency = 'You keep good time.';
-    if (avg < -15) tendency = `You tend to rush (play early) by about ${Math.round(-avg)} ms.`;
-    else if (avg > 15) tendency = `You tend to drag (play late) by about ${Math.round(avg)} ms.`;
-    $('rhStats').textContent = `${onBeat} of the last ${hits.length} strums on the beat. ${tendency}`;
+    let tendency = 'Pysyt hyvin tahdissa.';
+    if (avg < -15) tendency = `Kiirehdit (soitat etuajassa) noin ${Math.round(-avg)} ms.`;
+    else if (avg > 15) tendency = `Laahaat (soitat myöhässä) noin ${Math.round(avg)} ms.`;
+    $('rhStats').textContent = `${onBeat}/${hits.length} viimeisimmästä lyönnistä tahdissa. ${tendency}`;
   }
 
   $('rhToggle').addEventListener('click', () => (metro.running ? metroStop() : metroStart()));
@@ -101,10 +103,10 @@ const rhythm = (() => {
     hits = [];
   });
   $('rhCalibrate').addEventListener('click', () => {
-    if (!mic.analyser) { $('rhLatency').textContent = 'Press "Start listening" first.'; return; }
+    if (!mic.analyser) { $('rhLatency').textContent = 'Paina ensin "Aloita kuuntelu".'; return; }
     if (!metro.running) metroStart();
     calibration = [];
-    $('rhLatency').textContent = 'Calibrating: strum exactly on the next 8 clicks…';
+    $('rhLatency').textContent = 'Kalibroidaan: lyö sointu tarkalleen seuraavan 8 naksun kohdalla…';
   });
   renderLatency();
   renderDots(-1, false);
@@ -129,7 +131,7 @@ const rhythm = (() => {
 
       if (calibration) {
         calibration.push((f.onset - nearestGrid(f.onset)) * 1000);
-        $('rhLatency').textContent = `Calibrating: ${calibration.length} of 8…`;
+        $('rhLatency').textContent = `Kalibroidaan: ${calibration.length}/8…`;
         if (calibration.length >= 8) {
           latency = Math.max(0, median(calibration) / 1000);
           store.set('latency', latency);
@@ -143,7 +145,7 @@ const rhythm = (() => {
       const off = (t - nearestGrid(t)) * 1000;
       hits.push(off);
       if (hits.length > 20) hits.shift();
-      const text = Math.abs(off) <= 40 ? 'On the beat' : off < 0 ? `${Math.round(-off)} ms early` : `${Math.round(off)} ms late`;
+      const text = Math.abs(off) <= 40 ? 'Tahdissa' : off < 0 ? `${Math.round(-off)} ms aikaisin` : `${Math.round(off)} ms myöhässä`;
       setFeedback($('rhLast'), text, Math.abs(off) <= 40 ? 'good' : Math.abs(off) <= 80 ? 'warn' : 'badc');
       renderStats();
     },

@@ -13,7 +13,7 @@ function getCtx() {
 
 async function startMic() {
   if (!navigator.mediaDevices?.getUserMedia) {
-    setStatus('This browser does not support microphone access.', true);
+    setStatus('Tämä selain ei tue mikrofonia.', true);
     return;
   }
   const ctx = getCtx();   // inside the tap: iOS only lets audio start from a user gesture
@@ -23,7 +23,7 @@ async function startMic() {
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
     });
   } catch (err) {
-    setStatus('Microphone access failed: ' + err.message + (window.isSecureContext ? '' : ' (the page must be opened over https or from localhost).'), true);
+    setStatus('Mikrofonin käyttö epäonnistui: ' + err.message + (window.isSecureContext ? '' : ' (sivu pitää avata https-osoitteesta tai localhostista).'), true);
     return;
   }
   const source = ctx.createMediaStreamSource(stream);
@@ -47,18 +47,18 @@ async function startMic() {
     timeData: new Float32Array(analyser.fftSize),
     lpData: new Float32Array(lpAnalyser.fftSize),
   });
-  $('toggle').textContent = 'Stop listening';
+  $('toggle').textContent = 'Lopeta kuuntelu';
   $('toggle').classList.add('stop');
-  setStatus(`Listening (${ctx.sampleRate} Hz).`);
+  setStatus(`Kuuntelee (${ctx.sampleRate} Hz).`);
 }
 
 function stopMic() {
   mic.stream?.getTracks().forEach(t => t.stop());
   mic.source?.disconnect();
   Object.assign(mic, { stream: null, source: null, analyser: null, lpAnalyser: null });
-  $('toggle').textContent = 'Start listening';
+  $('toggle').textContent = 'Aloita kuuntelu';
   $('toggle').classList.remove('stop');
-  setStatus('Stopped.');
+  setStatus('Pysäytetty.');
 }
 
 // Plays a note with a few harmonics. Returns the seconds until it ends.

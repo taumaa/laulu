@@ -29,7 +29,7 @@ const workout = (() => {
   function fillVoices() {
     const r = store.get('range', null);
     const opts = [];
-    if (r) opts.push(['measured', `My range (${noteName(r.low)}–${noteName(r.high)})`]);
+    if (r) opts.push(['measured', `Oma ääniala (${noteName(r.low)}–${noteName(r.high)})`]);
     VOICE_RANGES.forEach((v, i) => opts.push([String(i), `${v.name} (${noteName(v.low)}–${noteName(v.high)})`]));
     let sel = store.get('workout.voice', r ? 'measured' : '1');
     if (!opts.some(o => o[0] === sel)) sel = r ? 'measured' : '1';
@@ -44,7 +44,7 @@ const workout = (() => {
     return [vr.low, vr.high];
   }
 
-  const repLabel = (plan, i) => (plan.phases ? `Round ${i + 1}` : noteName(plan.reps[i].tonic));
+  const repLabel = (plan, i) => (plan.phases ? `Kierros ${i + 1}` : noteName(plan.reps[i].tonic));
   const repCount = plan => (plan.phases ? Math.max(...plan.phases.map(p => p.rep)) + 1 : plan.reps.length);
   const repEnd = (plan, i) => (plan.phases ? Math.max(...plan.phases.filter(p => p.rep === i).map(p => p.end)) : plan.reps[i].end);
 
@@ -61,12 +61,12 @@ const workout = (() => {
   function renderBest(ex) {
     const best = store.get('workout.best.' + ex.id, null);
     const last = store.get('workout.last.' + ex.id, null);
-    $('woBest').textContent = best === null ? 'Not sung yet.' : `Best ${best}% · last ${last}%`;
+    $('woBest').textContent = best === null ? 'Ei vielä laulettu.' : `Paras ${best} % · viimeksi ${last} %`;
   }
 
   function renderInfo() {
     const ex = exercise();
-    $('woTitle').textContent = ex.title + (ex.syllable && !ex.title.includes(`"${ex.syllable}"`) ? ` · sing "${ex.syllable}"` : '');
+    $('woTitle').textContent = ex.title + (ex.syllable && !ex.title.includes(`"${ex.syllable}"`) ? ` · tavu "${ex.syllable}"` : '');
     $('woFocus').textContent = ex.focus;
     $('woHow').textContent = ex.how;
     const breath = ex.kind === 'breath';
@@ -77,18 +77,18 @@ const workout = (() => {
     renderRepChips(preview);
     renderBest(ex);
     const secs = Math.round(preview.length);
-    $('woProgress').textContent = breath ? `${repCount(preview)} rounds · about ${secs} s`
-      : `${preview.reps.length} keys, ${noteName(preview.reps[0].tonic)} and up · about ${Math.floor(secs / 60)} min ${secs % 60} s`;
+    $('woProgress').textContent = breath ? `${repCount(preview)} kierrosta · noin ${secs} s`
+      : `${preview.reps.length} sävellajia, alkaen ${noteName(preview.reps[0].tonic)} · noin ${Math.floor(secs / 60)} min ${secs % 60} s`;
     $('woNow').textContent = '–';
     $('woBar').style.width = '0%';
-    $('woBreathPhase').textContent = breath ? 'Ready' : '';
+    $('woBreathPhase').textContent = breath ? 'Valmiina' : '';
     $('woBreathCount').textContent = '–';
     if (!run) drawNotes(preview, [], -0.5);
   }
 
   // ----- Running an exercise -----
   function start(ex) {
-    if (!mic.analyser) { fb('Press "Start listening" first.', 'warn'); return false; }
+    if (!mic.analyser) { fb('Paina ensin "Aloita kuuntelu".', 'warn'); return false; }
     stop();
     const ctx = getCtx();
     const plan = vxPlan(ex, vrange(), options());
@@ -106,7 +106,7 @@ const workout = (() => {
       points: [],
       errors: { all: [], attack: [], held: [] },
     };
-    fb(ex.kind === 'breath' ? 'Get ready to breathe in.' : 'Listen to the chord, then sing along.');
+    fb(ex.kind === 'breath' ? 'Valmistaudu hengittämään sisään.' : 'Kuuntele sointu ja laula sitten mukana.');
     $('woTips').innerHTML = '';
     renderRepChips(plan, [], 0);
     renderButtons();
@@ -134,9 +134,9 @@ const workout = (() => {
 
   function renderButtons() {
     const single = !!run && !program;
-    $('woStart').textContent = single ? 'Stop' : 'Start';
+    $('woStart').textContent = single ? 'Lopeta' : 'Aloita';
     $('woStart').classList.toggle('stop', single);
-    $('woProgram').textContent = program ? 'Stop warm-up' : 'Daily warm-up';
+    $('woProgram').textContent = program ? 'Lopeta lämmittely' : 'Päivän lämmittely';
     $('woProgram').classList.toggle('stop', !!program);
   }
 
@@ -179,28 +179,28 @@ const workout = (() => {
     const { plan, errors } = run;
     if (plan.phases) {
       const scores = run.repScores.filter(s => s !== null);
-      if (!run.score.some(s => s && s.good)) return ["The mic didn't hear the hiss. Hiss a little closer to it, or lower the Gate."];
-      if (Math.min(...scores) < 70) return ['The air ran out or stopped before the end. Breathe lower, and let it out more slowly.'];
-      return ['Steady all the way out.'];
+      if (!run.score.some(s => s && s.good)) return ['Mikrofoni ei kuullut sihinää. Sihise vähän lähempänä mikrofonia tai laske kynnystä.'];
+      if (Math.min(...scores) < 70) return ['Ilma loppui tai katkesi ennen loppua. Hengitä syvemmälle ja päästä ilma ulos hitaammin.'];
+      return ['Tasainen loppuun asti.'];
     }
     const out = [];
     const avgCents = arr => (arr.length >= 20 ? 100 * mean(arr) : null);
     const lean = avgCents(errors.all);
-    if (lean !== null && Math.abs(lean) >= 15) out.push(`You go ${lean < 0 ? 'flat' : 'sharp'} overall (about ${Math.round(Math.abs(lean))} cents).`);
+    if (lean !== null && Math.abs(lean) >= 15) out.push(`Laulat yleensä ${lean < 0 ? 'matalalta' : 'korkealta'} (noin ${Math.round(Math.abs(lean))} senttiä).`);
     const attack = avgCents(errors.attack), held = avgCents(errors.held);
     if (attack !== null && held !== null) {
-      if (attack - held <= -25) out.push('You slide up into notes from below. Hear the note first, then start right on it.');
-      else if (attack - held >= 25) out.push('You drop into notes from above.');
+      if (attack - held <= -25) out.push('Liu\'ut säveliin alhaalta. Kuule sävel ensin mielessäsi ja aloita suoraan siitä.');
+      else if (attack - held >= 25) out.push('Putoat säveliin ylhäältä.');
     }
     const sung = run.repScores.map((s, i) => ({ s, tonic: plan.reps[i].tonic })).filter(x => x.s !== null);
     if (sung.length >= 4) {
       const top = Math.max(...sung.map(x => x.tonic));
       const high = sung.filter(x => top - x.tonic <= 1).map(x => x.s);
       const rest = sung.filter(x => top - x.tonic > 1).map(x => x.s);
-      if (high.length && rest.length && mean(high) < mean(rest) - 15) out.push('The highest keys were the hardest. Keep the sound lighter as you go up, or try fewer keys.');
+      if (high.length && rest.length && mean(high) < mean(rest) - 15) out.push('Korkeimmat sävellajit olivat vaikeimpia. Kevennä ääntä ylöspäin mennessä tai kokeile vähemmillä sävellajeilla.');
     }
-    if (!out.length && overall() >= 80) out.push('Well in tune. Try it faster, or without the piano guide.');
-    if (!out.length && overall() < 50) out.push('Try it slower, and listen to the piano before each note.');
+    if (!out.length && overall() >= 80) out.push('Hyvin vireessä. Kokeile nopeammin tai ilman pianon tukea.');
+    if (!out.length && overall() < 50) out.push('Kokeile hitaammin ja kuuntele piano ennen jokaista säveltä.');
     return out;
   }
 
@@ -218,8 +218,8 @@ const workout = (() => {
     store.set('workout.best.' + ex.id, best);
     store.set('workout.last.' + ex.id, score);
     $('woTips').innerHTML = tips().map(t => `<div>• ${t}</div>`).join('');
-    const what = ex.kind === 'breath' ? 'of the hiss heard' : 'in tune';
-    fb(`Done: ${score}% ${what}.${score >= best && score > 0 ? ' Your best yet!' : ''}`, score >= 80 ? 'good' : 'warn');
+    const what = ex.kind === 'breath' ? 'sihinästä kuului' : 'vireessä';
+    fb(`Valmis: ${score} % ${what}.${score >= best && score > 0 ? ' Paras tuloksesi!' : ''}`, score >= 80 ? 'good' : 'warn');
     renderBest(ex);
     $('woBar').style.width = '100%';
     stop();
@@ -227,7 +227,7 @@ const workout = (() => {
       program.scores.push({ title: ex.title, score });
       if (program.i + 1 < program.list.length) {
         const next = VOICE_EXERCISE_BY_ID[program.list[program.i + 1]];
-        $('woProgress').textContent = `Warm-up ${program.i + 1} of ${program.list.length} done. Next: ${next.title}…`;
+        $('woProgress').textContent = `Lämmittely ${program.i + 1}/${program.list.length} tehty. Seuraavaksi: ${next.title}…`;
         program.timer = setTimeout(() => {
           if (!program) return;
           program.i++;
@@ -238,8 +238,8 @@ const workout = (() => {
       } else {
         const avg = Math.round(mean(program.scores.map(s => s.score)));
         store.set('workout.warmups', store.get('workout.warmups', 0) + 1);
-        fb(`Warm-up finished: ${avg}% on average. Well done!`, 'good');
-        $('woProgress').textContent = `Warm-ups finished so far: ${store.get('workout.warmups', 0)}.`;
+        fb(`Lämmittely valmis: keskimäärin ${avg} %. Hienoa!`, 'good');
+        $('woProgress').textContent = `Tehtyjä lämmittelyjä: ${store.get('workout.warmups', 0)}.`;
         stopProgram();
       }
     }
@@ -307,7 +307,7 @@ const workout = (() => {
     if (!points.length && now < 0) {
       g.fillStyle = '#8a90a0';
       g.font = '13px system-ui';
-      g.fillText('Press Start: the notes scroll to the white line.', labelW + 8, 18);
+      g.fillText('Paina Aloita: sävelet liukuvat valkoiselle viivalle.', labelW + 8, 18);
     }
   }
 
@@ -334,15 +334,15 @@ const workout = (() => {
         }
       }
       $('woNow').textContent = tg.from === tg.to ? noteName(tg.from) : `${noteName(tg.from)}→${noteName(tg.to)}`;
-      if (shown === null) fb(`Sing "${run.ex.syllable}"`);
-      else if (good) fb('In tune', 'good');
-      else fb(shown < target ? 'Too low ↑' : 'Too high ↓', 'warn');
+      if (shown === null) fb(`Laula "${run.ex.syllable}"`);
+      else if (good) fb('Vireessä', 'good');
+      else fb(shown < target ? 'Liian matala ↑' : 'Liian korkea ↓', 'warn');
     } else {
       const next = plan.targets[run.ti];
       if (f.smoothMidi !== null && next) shown = fold(f.smoothMidi, next.from);
       const repIdx = plan.reps.findIndex(r => t >= r.start && t < r.end);
       const firstOfRep = plan.targets.find(x => x.rep === repIdx);
-      fb(firstOfRep && t < firstOfRep.start ? 'Listen to the key…' : 'Breathe');
+      fb(firstOfRep && t < firstOfRep.start ? 'Kuuntele sävellaji…' : 'Hengitä');
       $('woNow').textContent = next ? noteName(next.from) : '–';
     }
     run.points.push({ t, m: shown, good });
@@ -363,9 +363,9 @@ const workout = (() => {
       const s = run.score[scored.rep] || (run.score[scored.rep] = { good: 0, frames: 0 });
       s.frames++;
       s.good += f.audible;
-      fb(f.audible ? 'Steady hiss – keep it going' : 'Keep the hiss going', f.audible ? 'good' : 'warn');
+      fb(f.audible ? 'Tasaista sihinää – jatka' : 'Jatka sihinää', f.audible ? 'good' : 'warn');
     } else if (shownPhase) {
-      fb(shownPhase.label === 'Hold' ? 'Hold the air, throat open' : 'Breathe in low');
+      fb(shownPhase.kind === 'hold' ? 'Pidätä ilmaa, kurkku avoimena' : 'Hengitä syvään alas vatsaan');
     }
   }
 
@@ -381,12 +381,12 @@ const workout = (() => {
   $('woVoice').addEventListener('change', () => { store.set('workout.voice', $('woVoice').value); if (!run) renderInfo(); });
   for (const id of ['woTempo', 'woKeys', 'woGuide']) $(id).addEventListener('change', () => { if (!run) renderInfo(); });
   $('woStart').addEventListener('click', () => {
-    if (run || program) { stopProgram(); stop(); fb('Stopped.'); renderInfo(); return; }
+    if (run || program) { stopProgram(); stop(); fb('Pysäytetty.'); renderInfo(); return; }
     start(exercise());
   });
   $('woProgram').addEventListener('click', () => {
-    if (program) { stopProgram(); stop(); fb('Warm-up stopped.'); renderInfo(); return; }
-    if (!mic.analyser) { fb('Press "Start listening" first.', 'warn'); return; }
+    if (program) { stopProgram(); stop(); fb('Lämmittely pysäytetty.'); renderInfo(); return; }
+    if (!mic.analyser) { fb('Paina ensin "Aloita kuuntelu".', 'warn'); return; }
     program = { list: VOICE_WARM_UP, i: 0, scores: [], timer: 0 };
     $('woExercise').value = program.list[0];
     renderInfo();
@@ -400,7 +400,7 @@ const workout = (() => {
   return {
     onShow() { fillVoices(); if (!run) renderInfo(); },
     onHide() {
-      if (run || program) { stopProgram(); stop(); fb('Stopped when you left the tab.'); }
+      if (run || program) { stopProgram(); stop(); fb('Pysäytetty, kun vaihdoit välilehteä.'); }
     },
     onFrame(f) {
       if (!run || !audioCtx) return;
@@ -414,11 +414,11 @@ const workout = (() => {
         const rep = run.plan.reps.find(r => now >= r.start && now < r.end);
         if (rep) {
           const i = run.plan.reps.indexOf(rep);
-          const pre = program ? `Warm-up ${program.i + 1} of ${program.list.length} · ` : '';
-          $('woProgress').textContent = `${pre}Key ${i + 1} of ${run.plan.reps.length}: ${noteName(rep.tonic)} ${run.ex.minor ? 'minor' : 'major'}`;
+          const pre = program ? `Lämmittely ${program.i + 1}/${program.list.length} · ` : '';
+          $('woProgress').textContent = `${pre}Sävellaji ${i + 1}/${run.plan.reps.length}: ${noteName(rep.tonic)}-${run.ex.minor ? 'molli' : 'duuri'}`;
         }
       } else if (program) {
-        $('woProgress').textContent = `Warm-up ${program.i + 1} of ${program.list.length} · breathing`;
+        $('woProgress').textContent = `Lämmittely ${program.i + 1}/${program.list.length} · hengitys`;
       }
       closeReps(t);
       if (now >= run.plan.length + run.latency) finish();

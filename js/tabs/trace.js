@@ -10,7 +10,7 @@ const trace = (() => {
   $('trPause').addEventListener('click', () => {
     paused = !paused;
     pausedAt = performance.now() / 1000;
-    $('trPause').textContent = paused ? 'Resume' : 'Pause';
+    $('trPause').textContent = paused ? 'Jatka' : 'Tauko';
   });
 
   return {
@@ -23,14 +23,14 @@ const trace = (() => {
       const n = Math.round(m);
       const cents = (m - n) * 100;
       $('trNote').textContent = noteName(n);
-      $('trInfo').textContent = `${f.pitch.freq.toFixed(1)} Hz · ${fmtCents(cents)}`;
+      $('trInfo').textContent = `${fmtHz(f.pitch.freq)} · ${fmtCents(cents)}`;
       if (recent.length && recent[0].note !== n) recent.length = 0;
       recent.push({ note: n, cents });
       if (recent.length > 60) recent.shift();
       if (recent.length >= 20) {
         const sd = stdDev(recent.map(r => r.cents));
-        const word = sd < 8 ? 'very steady' : sd < 20 ? 'fairly steady' : 'wobbly';
-        $('trStats').textContent = `Steadiness on ${noteName(n)}: ±${Math.round(sd)} cents (${word}).`;
+        const word = sd < 8 ? 'hyvin vakaa' : sd < 20 ? 'melko vakaa' : 'huojuva';
+        $('trStats').textContent = `Vakaus sävelessä ${noteName(n)}: ±${Math.round(sd)} senttiä (${word}).`;
       }
     },
   };

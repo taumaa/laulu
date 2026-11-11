@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="fi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f1115">
-<meta name="description" content="Guitar and voice trainer in the browser: tuner, chord detection, chord trainer, fretboard, rhythm, pitch, singing and vocal exercises.">
-<title>Guitar and Voice Trainer</title>
+<meta name="description" content="Kitara- ja laulutreeni selaimessa: viritin, sointujen tunnistus, sointuharjoitus, otelauta, rytmi, sävelkorkeus, laulu ja ääniharjoitukset.">
+<title>Kitara- ja laulutreeni</title>
 <link rel="stylesheet" href="css/style.css">
 <script defer src="js/music.js"></script>
 <script defer src="js/util.js"></script>
@@ -29,75 +29,75 @@
 <body>
 <main>
   <header>
-    <h1>Guitar &amp; Voice Trainer</h1>
+    <h1>Kitara- ja laulutreeni</h1>
     <div class="controls">
       <label>A4 <input id="a4" type="number" inputmode="numeric" min="400" max="480" value="440"> Hz</label>
-      <label>Gate <input id="gate" type="range" min="-80" max="-25" value="-55"> <span id="gateVal" class="num">-55 dB</span></label>
-      <button id="toggle" class="toggle-btn">Start listening</button>
+      <label>Kynnys <input id="gate" type="range" min="-80" max="-25" value="-55"> <span id="gateVal" class="num">-55 dB</span></label>
+      <button id="toggle" class="toggle-btn">Aloita kuuntelu</button>
     </div>
   </header>
-  <div id="status" class="status" role="status">Press "Start listening" and allow microphone access.</div>
+  <div id="status" class="status" role="status">Paina "Aloita kuuntelu" ja salli mikrofonin käyttö.</div>
   <div class="level"><div id="level"></div></div>
 
-  <nav class="tabs" id="tabs" aria-label="Sections">
-    <button data-tab="detect">Detect</button>
-    <button data-tab="tuner">Tuner</button>
-    <button data-tab="chords">Chord trainer</button>
-    <button data-tab="fretboard">Fretboard</button>
-    <button data-tab="rhythm">Rhythm</button>
-    <button data-tab="trace">Pitch trace</button>
-    <button data-tab="sing">Sing</button>
-    <button data-tab="workout">Voice workout</button>
-    <button data-tab="range">Vocal range</button>
-    <button data-tab="ear">Ear training</button>
+  <nav class="tabs" id="tabs" aria-label="Osiot">
+    <button data-tab="detect">Tunnistus</button>
+    <button data-tab="tuner">Viritin</button>
+    <button data-tab="chords">Sointuharjoitus</button>
+    <button data-tab="fretboard">Otelauta</button>
+    <button data-tab="rhythm">Rytmi</button>
+    <button data-tab="trace">Sävelkäyrä</button>
+    <button data-tab="sing">Laula</button>
+    <button data-tab="workout">Ääniharjoitukset</button>
+    <button data-tab="range">Ääniala</button>
+    <button data-tab="ear">Korvaharjoitus</button>
   </nav>
 
   <!-- ===== Detect ===== -->
   <section id="tab-detect" class="tab">
     <div class="row">
-      <label>Mode
+      <label>Tila
         <select id="detMode">
-          <option value="auto">Auto</option>
-          <option value="note">Single note</option>
-          <option value="chord">Chord</option>
+          <option value="auto">Automaattinen</option>
+          <option value="note">Yksittäinen sävel</option>
+          <option value="chord">Sointu</option>
         </select>
       </label>
     </div>
     <div class="grid">
       <section class="panel hero">
-        <h2>Detected</h2>
+        <h2>Tunnistettu</h2>
         <div id="detKind" class="kind"></div>
         <div id="detResult" class="big">–</div>
         <div id="detSub" class="sub two-lines"></div>
         <div id="detDiagram" class="diagram"></div>
       </section>
       <section class="panel">
-        <h2>Chord names that fit</h2>
+        <h2>Sopivat sointunimet</h2>
         <div id="detCands" class="cands"></div>
         <p id="detCandsNote" class="note two-lines"></p>
       </section>
       <section class="panel">
-        <h2>Tuner</h2>
+        <h2>Viritin</h2>
         <div id="detTunerNote" class="tuner-note">–</div>
         <div class="meter"><div class="center"></div><div id="detNeedle" class="needle"></div></div>
         <div class="scale"><span>-50¢</span><span>-25¢</span><span>0</span><span>+25¢</span><span>+50¢</span></div>
         <div id="detTunerInfo" class="tuner-info"></div>
       </section>
       <section class="panel">
-        <h2>Notes heard</h2>
+        <h2>Kuullut sävelet</h2>
         <div id="detChips" class="chips fixed-2"></div>
-        <h2 class="spaced">Pitch classes</h2>
+        <h2 class="spaced">Sävelluokat</h2>
         <div id="detChroma" class="chroma"></div>
       </section>
       <section class="panel wide">
         <div class="panel-head">
-          <h2>Recent chords</h2>
-          <button id="detRecentClear" class="secondary mini">Clear</button>
+          <h2>Viimeisimmät soinnut</h2>
+          <button id="detRecentClear" class="secondary mini">Tyhjennä</button>
         </div>
         <div id="detRecent" class="chips one-line"></div>
       </section>
       <section class="panel wide">
-        <h2>Spectrum (60 – 2000 Hz)</h2>
+        <h2>Spektri (60 – 2000 Hz)</h2>
         <canvas id="detSpectrum"></canvas>
       </section>
     </div>
@@ -107,13 +107,13 @@
   <section id="tab-tuner" class="tab">
     <div class="panel">
       <div class="row">
-        <label>Tuning <select id="tunTuning" class="tuning-select"></select></label>
-        <label><input type="radio" name="tunMode" value="guided" checked> Guided (one string at a time)</label>
-        <label><input type="radio" name="tunMode" value="auto"> Auto (any string)</label>
+        <label>Viritys <select id="tunTuning" class="tuning-select"></select></label>
+        <label><input type="radio" name="tunMode" value="guided" checked> Ohjattu (kieli kerrallaan)</label>
+        <label><input type="radio" name="tunMode" value="auto"> Automaattinen (mikä tahansa kieli)</label>
       </div>
       <div class="row">
-        <button id="tunRef" class="secondary">Play reference</button>
-        <button id="tunReset" class="secondary">Start again</button>
+        <button id="tunRef" class="secondary">Soita vertailusävel</button>
+        <button id="tunReset" class="secondary">Aloita alusta</button>
       </div>
       <div id="tunStrings" class="strings"></div>
       <div id="tunNote" class="tuner-note">–</div>
@@ -121,7 +121,7 @@
       <div class="scale"><span>-50¢</span><span>-25¢</span><span>0</span><span>+25¢</span><span>+50¢</span></div>
       <div id="tunHint" class="feedback center-text"></div>
       <div id="tunInfo" class="tuner-info"></div>
-      <p class="note">Play one open string at a time and let it ring. "Tighten" means turn the tuning peg so the pitch goes up. A string gets a check mark after it stays in tune for 1 second.</p>
+      <p class="note">Soita yksi avoin kieli kerrallaan ja anna sen soida. "Kiristä" tarkoittaa, että käännät viritystappia niin, että sävel nousee. Kieli saa merkin, kun se pysyy vireessä 1 sekunnin.</p>
     </div>
   </section>
 
@@ -130,23 +130,23 @@
     <div class="grid">
       <section class="panel hero">
         <div class="row center">
-          <label>Chords <select id="chSet"></select></label>
-          <label>Drill
+          <label>Soinnut <select id="chSet"></select></label>
+          <label>Harjoitus
             <select id="chMode">
-              <option value="practice">Practice</option>
-              <option value="changes">One-minute changes</option>
+              <option value="practice">Harjoittelu</option>
+              <option value="changes">Minuutin vaihdot</option>
             </select>
           </label>
         </div>
         <div class="swap">
           <div id="chPractice" class="row center">
-            <button id="chNext">Next chord</button>
-            <button id="chHear" class="secondary">Hear it</button>
-            <label><input type="checkbox" id="chAuto" checked> Next chord when correct</label>
+            <button id="chNext">Seuraava sointu</button>
+            <button id="chHear" class="secondary">Kuuntele</button>
+            <label><input type="checkbox" id="chAuto" checked> Seuraava sointu, kun oikein</label>
           </div>
           <div id="chChanges" class="row center" hidden>
-            <select id="chA" aria-label="First chord"></select> ↔ <select id="chB" aria-label="Second chord"></select>
-            <button id="chStart" class="toggle-btn">Start 60 s</button>
+            <select id="chA" aria-label="Ensimmäinen sointu"></select> ↔ <select id="chB" aria-label="Toinen sointu"></select>
+            <button id="chStart" class="toggle-btn">Aloita 60 s</button>
           </div>
         </div>
         <div id="chTimer" class="sub"></div>
@@ -154,12 +154,12 @@
         <div id="chDiagram" class="diagram"></div>
       </section>
       <section class="panel">
-        <h2>Feedback</h2>
+        <h2>Palaute</h2>
         <div id="chFeedback" class="feedback"></div>
         <div id="chNotes" class="chips"></div>
         <div id="chHints" class="hints"></div>
-        <p class="note">Numbers in the dots are fingers: 1 = index, 2 = middle, 3 = ring, 4 = little finger. × = do not play the string. ○ = play the open string.
-        Strum the chord and let it ring. Green notes are heard, red notes are missing.</p>
+        <p class="note">Pisteiden numerot ovat sormia: 1 = etusormi, 2 = keskisormi, 3 = nimetön, 4 = pikkusormi. × = älä soita kieltä. ○ = soita avoin kieli.
+        Soita sointu ja anna sen soida. Vihreät sävelet kuuluvat, punaiset puuttuvat.</p>
       </section>
     </div>
   </section>
@@ -168,21 +168,21 @@
   <section id="tab-fretboard" class="tab">
     <div class="panel">
       <div class="row">
-        <label>Tuning <select id="fbTuning" class="tuning-select"></select></label>
-        <label><input type="checkbox" id="fbShowAll"> Show all note names</label>
-        <span class="sub">Playing: <b id="fbNow" class="num">–</b></span>
+        <label>Viritys <select id="fbTuning" class="tuning-select"></select></label>
+        <label><input type="checkbox" id="fbShowAll"> Näytä kaikki sävelnimet</label>
+        <span class="sub">Soi: <b id="fbNow" class="num">–</b></span>
       </div>
       <div class="scroll-x"><div id="fbBoard" class="fretboard"></div></div>
     </div>
     <div class="panel">
-      <h2>Note game</h2>
+      <h2>Sävelpeli</h2>
       <div class="row">
-        <button id="fbStart" class="toggle-btn">Start game</button>
-        <button id="fbSkip" class="secondary">Show answer</button>
-        <label><input type="checkbox" id="fbNaturals" checked> Natural notes only</label>
+        <button id="fbStart" class="toggle-btn">Aloita peli</button>
+        <button id="fbSkip" class="secondary">Näytä vastaus</button>
+        <label><input type="checkbox" id="fbNaturals" checked> Vain luonnolliset sävelet</label>
       </div>
       <div class="row">
-        <span class="sub">Strings:</span><span id="fbStrings" class="row tight"></span>
+        <span class="sub">Kielet:</span><span id="fbStrings" class="row tight"></span>
       </div>
       <div id="fbPrompt" class="big small prompt"></div>
       <div id="fbFeedback" class="feedback"></div>
@@ -194,26 +194,26 @@
   <section id="tab-rhythm" class="tab">
     <div class="panel">
       <div class="row">
-        <button id="rhToggle" class="toggle-btn wide-toggle">Start metronome</button>
-        <label>BPM <input type="range" id="rhBpm" min="40" max="200" value="80"> <b id="rhBpmVal" class="num">80</b></label>
-        <label>Beats per bar
+        <button id="rhToggle" class="toggle-btn wide-toggle">Käynnistä metronomi</button>
+        <label>Tempo <input type="range" id="rhBpm" min="40" max="200" value="80"> <b id="rhBpmVal" class="num">80</b></label>
+        <label>Iskuja tahdissa
           <select id="rhBeats"><option>2</option><option>3</option><option selected>4</option><option>6</option></select>
         </label>
-        <label>Strum on
-          <select id="rhSub"><option value="1">Every beat</option><option value="2">Every half beat</option></select>
+        <label>Lyönnit
+          <select id="rhSub"><option value="1">Joka iskulla</option><option value="2">Joka puoli-iskulla</option></select>
         </label>
-        <label><input type="checkbox" id="rhAccent" checked> Accent beat 1</label>
+        <label><input type="checkbox" id="rhAccent" checked> Korosta 1. isku</label>
       </div>
       <div id="rhBeatDots" class="beat-dots"></div>
       <div id="rhLast" class="big small center-text">–</div>
       <canvas id="rhStrip" class="strip"></canvas>
       <div id="rhStats" class="sub center-text three-lines"></div>
       <div class="row" style="margin-top:12px">
-        <button id="rhCalibrate" class="secondary">Calibrate microphone delay</button>
+        <button id="rhCalibrate" class="secondary">Kalibroi mikrofonin viive</button>
         <span id="rhLatency" class="sub rh-latency"></span>
       </div>
-      <p class="note">Strum on each click. Green zone = within 40 ms of the beat. Use headphones if you can, so the microphone does not hear the clicks.
-      Calibrate once: start the metronome, press "Calibrate" and strum exactly on 8 clicks.</p>
+      <p class="note">Lyö sointu jokaisella naksulla. Vihreä alue = enintään 40 ms iskusta. Käytä kuulokkeita, jos voit, ettei mikrofoni kuule naksuja.
+      Kalibroi kerran: käynnistä metronomi, paina "Kalibroi" ja lyö sointu tarkalleen 8 naksun kohdalla.</p>
     </div>
   </section>
 
@@ -223,11 +223,11 @@
       <div class="row">
         <div id="trNote" class="tuner-note" style="min-width:110px">–</div>
         <div id="trInfo" class="sub grow"></div>
-        <button id="trPause" class="secondary toggle-btn">Pause</button>
+        <button id="trPause" class="secondary toggle-btn">Tauko</button>
       </div>
       <canvas id="trCanvas" class="trace"></canvas>
       <div id="trStats" class="sub two-lines" style="margin-top:8px"></div>
-      <p class="note">Sing or play and watch the line. A flat line means a steady note. Shaded lanes are sharps and flats (the black piano keys).</p>
+      <p class="note">Laula tai soita ja katso viivaa. Vaakasuora viiva tarkoittaa vakaata säveltä. Varjostetut kaistat ovat ylennettyjä ja alennettuja säveliä (pianon mustat koskettimet).</p>
     </div>
   </section>
 
@@ -235,20 +235,20 @@
   <section id="tab-sing" class="tab">
     <div class="panel">
       <div class="row">
-        <label>Exercise
+        <label>Harjoitus
           <select id="sgExercise">
-            <option value="random">Random notes</option>
-            <option value="scale">Major scale up and down</option>
-            <option value="arpeggio">Arpeggio (1-3-5-8)</option>
+            <option value="random">Satunnaiset sävelet</option>
+            <option value="scale">Duuriasteikko ylös ja alas</option>
+            <option value="arpeggio">Murtosointu (1-3-5-8)</option>
           </select>
         </label>
-        <label>Start note <select id="sgRoot"></select></label>
-        <label><input type="checkbox" id="sgAnyOctave" checked> Any octave counts</label>
+        <label>Aloitussävel <select id="sgRoot"></select></label>
+        <label><input type="checkbox" id="sgAnyOctave" checked> Mikä tahansa oktaavi käy</label>
       </div>
       <div class="row">
-        <button id="sgStart" class="toggle-btn">Start</button>
-        <button id="sgReplay" class="secondary">Replay note</button>
-        <button id="sgSkip" class="secondary">Skip</button>
+        <button id="sgStart" class="toggle-btn">Aloita</button>
+        <button id="sgReplay" class="secondary">Soita sävel uudelleen</button>
+        <button id="sgSkip" class="secondary">Ohita</button>
       </div>
       <div class="row nowrap">
         <div id="sgTarget" class="big small" style="min-width:110px">–</div>
@@ -260,7 +260,7 @@
       <div class="progress"><div id="sgHold"></div></div>
       <canvas id="sgCanvas" class="trace"></canvas>
       <div id="sgResults" class="results-box"></div>
-      <p class="note">Listen to the note, then sing it and hold it inside the orange band for 2 seconds. Headphones help.</p>
+      <p class="note">Kuuntele sävel, laula se ja pidä se oranssin kaistan sisällä 2 sekuntia. Kuulokkeet auttavat.</p>
     </div>
   </section>
 
@@ -268,26 +268,26 @@
   <section id="tab-workout" class="tab">
     <div class="panel">
       <div class="row">
-        <label>Exercise <select id="woExercise"></select></label>
+        <label>Harjoitus <select id="woExercise"></select></label>
         <label>Tempo
           <select id="woTempo">
-            <option value="0.8">Slower</option>
-            <option value="1" selected>Normal</option>
-            <option value="1.2">Faster</option>
+            <option value="0.8">Hitaampi</option>
+            <option value="1" selected>Normaali</option>
+            <option value="1.2">Nopeampi</option>
           </select>
         </label>
-        <label>Keys
+        <label>Sävellajeja
           <select id="woKeys">
-            <option value="0" selected>Default</option>
+            <option value="0" selected>Oletus</option>
             <option value="3">3</option><option value="5">5</option><option value="8">8</option>
           </select>
         </label>
-        <label><input type="checkbox" id="woGuide" checked> Piano guide</label>
-        <label>Range <select id="woVoice"></select></label>
+        <label><input type="checkbox" id="woGuide" checked> Pianon tuki</label>
+        <label>Ääniala <select id="woVoice"></select></label>
       </div>
       <div class="row">
-        <button id="woStart" class="toggle-btn">Start</button>
-        <button id="woProgram" class="secondary toggle-btn wide-toggle">Daily warm-up</button>
+        <button id="woStart" class="toggle-btn">Aloita</button>
+        <button id="woProgram" class="secondary toggle-btn wide-toggle">Päivän lämmittely</button>
         <span id="woBest" class="sub grow"></span>
       </div>
       <div class="wo-info">
@@ -298,7 +298,7 @@
         <div id="woNow" class="big small">–</div>
         <div class="grow">
           <div id="woFeedback" class="feedback"></div>
-          <div id="woProgress" class="sub"></div>
+          <div id="woProgress" class="sub two-lines"></div>
         </div>
       </div>
       <div class="progress"><div id="woBar"></div></div>
@@ -307,35 +307,35 @@
         <div id="woBreathPhase" class="big small">–</div>
         <div id="woBreathCount" class="breath-count">–</div>
       </div>
-      <h2 class="spaced">Score per key</h2>
+      <h2 class="spaced">Pisteet sävellajeittain</h2>
       <div id="woKeysScore" class="chips"></div>
       <div id="woTips" class="hints short"></div>
-      <p class="note">Your range comes from the Vocal range tab; if you have not measured it, pick a voice type. The piano gives each key with a chord, then plays the notes with you.
-        Any octave counts. Use headphones, or turn the piano guide off, so the microphone hears only your voice.</p>
+      <p class="note">Ääniala tulee Ääniala-välilehdeltä. Jos et ole mitannut sitä, valitse äänityyppi. Piano antaa jokaisen sävellajin soinnulla ja soittaa sitten sävelet kanssasi.
+        Mikä tahansa oktaavi käy. Käytä kuulokkeita tai ota pianon tuki pois, jotta mikrofoni kuulee vain äänesi.</p>
     </div>
   </section>
 
   <!-- ===== Vocal range ===== -->
   <section id="tab-range" class="tab">
     <div class="panel">
-      <p class="note" style="margin-top:0">Press Start. Sing down to your lowest comfortable note and hold it for half a second. Then sing up to your highest comfortable note and hold it.
-      Do not strain. Press Save when you are done. The Sing, Voice workout and Ear training tabs use the saved range.</p>
+      <p class="note" style="margin-top:0">Paina Aloita. Laula alas matalimpaan mukavaan säveleesi ja pidä sitä puoli sekuntia. Laula sitten ylös korkeimpaan mukavaan säveleesi ja pidä se.
+      Älä pinnistele. Paina lopuksi Tallenna. Laula-, Ääniharjoitukset- ja Korvaharjoitus-välilehdet käyttävät tallennettua äänialaa.</p>
       <div class="row">
-        <button id="rgStart" class="toggle-btn">Start</button>
-        <button id="rgSave" class="secondary">Save range</button>
-        <button id="rgReset" class="secondary">Reset</button>
+        <button id="rgStart" class="toggle-btn">Aloita</button>
+        <button id="rgSave" class="secondary">Tallenna ääniala</button>
+        <button id="rgReset" class="secondary">Nollaa</button>
       </div>
       <div class="row">
-        <span class="nudge">Lowest: <button class="secondary mini" id="rgLowDown" aria-label="Lower">−</button> <b id="rgLow" class="num">–</b> <button class="secondary mini" id="rgLowUp" aria-label="Higher">+</button></span>
-        <span class="nudge">Highest: <button class="secondary mini" id="rgHighDown" aria-label="Lower">−</button> <b id="rgHigh" class="num">–</b> <button class="secondary mini" id="rgHighUp" aria-label="Higher">+</button></span>
-        <span class="sub">Now: <b id="rgNow" class="num">–</b></span>
+        <span class="nudge">Matalin: <button class="secondary mini" id="rgLowDown" aria-label="Alemmas">−</button> <b id="rgLow" class="num">–</b> <button class="secondary mini" id="rgLowUp" aria-label="Ylemmäs">+</button></span>
+        <span class="nudge">Korkein: <button class="secondary mini" id="rgHighDown" aria-label="Alemmas">−</button> <b id="rgHigh" class="num">–</b> <button class="secondary mini" id="rgHighUp" aria-label="Ylemmäs">+</button></span>
+        <span class="sub">Nyt: <b id="rgNow" class="num">–</b></span>
       </div>
       <div class="scroll-x"><div id="rgKeyboard" class="keyboard"></div></div>
       <div id="rgSummary" class="feedback" style="margin-top:12px"></div>
-      <h2 class="spaced">Overlap with reference voice ranges</h2>
+      <h2 class="spaced">Päällekkäisyys äänialojen kanssa</h2>
       <div id="rgVoices"></div>
-      <p class="note">Voice categories are rough guides from choir singing. They are not tied to gender or age, and many voices fit more than one.
-      Your comfortable range can grow with practice.</p>
+      <p class="note">Äänialat ovat karkeita suuntaviivoja kuorolaulusta. Ne eivät riipu sukupuolesta tai iästä, ja moni ääni sopii useampaan kuin yhteen.
+      Mukava äänialasi voi kasvaa harjoittelemalla.</p>
     </div>
   </section>
 
@@ -343,25 +343,25 @@
   <section id="tab-ear" class="tab">
     <div class="panel">
       <div class="row">
-        <label>Exercise
+        <label>Harjoitus
           <select id="erLevel">
-            <option value="note">Single note</option>
-            <option value="interval">Interval</option>
-            <option value="chord">Chord type</option>
+            <option value="note">Yksittäinen sävel</option>
+            <option value="interval">Intervalli</option>
+            <option value="chord">Sointutyyppi</option>
           </select>
         </label>
-        <label>Difficulty <select id="erDifficulty"><option value="easy">Easy</option><option value="all">All</option></select></label>
-        <label>Answer by
+        <label>Vaikeus <select id="erDifficulty"><option value="easy">Helppo</option><option value="all">Kaikki</option></select></label>
+        <label>Vastaa
           <select id="erAnswer">
-            <option value="echo">Singing or playing it back</option>
-            <option value="name">Choosing the name</option>
+            <option value="echo">Laulamalla tai soittamalla</option>
+            <option value="name">Valitsemalla nimen</option>
           </select>
         </label>
       </div>
       <div class="row">
-        <button id="erNew">New question</button>
-        <button id="erReplay" class="secondary">Play again</button>
-        <button id="erReveal" class="secondary">Show answer</button>
+        <button id="erNew">Uusi kysymys</button>
+        <button id="erReplay" class="secondary">Soita uudelleen</button>
+        <button id="erReveal" class="secondary">Näytä vastaus</button>
       </div>
       <div id="erPrompt" class="sub two-lines"></div>
       <div id="erAnswers" class="answers" style="margin-top:12px"></div>
@@ -371,9 +371,10 @@
   </section>
 
   <footer>
-    All sound processing happens in your browser. The app does not record or send audio, and there is no server: settings and scores stay in this browser.
-    The app turns off the browser's echo cancellation, noise suppression and auto gain, because they distort the sound.
-    Detection is heuristic: some voicings, very soft notes or strong overtones can give a wrong result.
+    Kaikki äänenkäsittely tapahtuu selaimessasi. Sovellus ei tallenna eikä lähetä ääntä, eikä palvelinta ole: asetukset ja pisteet pysyvät tässä selaimessa.
+    Sovellus ottaa pois selaimen kaiunpoiston, kohinanvaimennuksen ja automaattisen äänenvoimakkuuden, koska ne vääristävät ääntä.
+    Tunnistus on arvioivaa: jotkin sointuotteet, hyvin hiljaiset sävelet tai voimakkaat yläsävelet voivat antaa väärän tuloksen.
+    Sävelnimet ovat pohjoismaiset: H = englanniksi B ja B = B♭.
   </footer>
 </main>
 </body>
