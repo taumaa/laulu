@@ -2,116 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="description" content="Guitar and voice trainer in the browser: tuner, chord detection, chord trainer, fretboard, rhythm, pitch, singing and vocal exercises.">
 <title>Guitar and Voice Trainer</title>
-<style>
-  :root {
-    --bg: #0f1115; --panel: #181b22; --panel2: #232835; --text: #e8eaf0; --muted: #8a90a0;
-    --accent: #4fd1a5; --warn: #f6ad55; --bad: #fc8181; --grid: #2a2f3a;
-  }
-  * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
-  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; background: var(--bg); color: var(--text); }
-  main { max-width: 1040px; margin: 0 auto; padding: 16px; }
-  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-  h1 { font-size: 1.25rem; margin: 0; }
-  .controls, .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .row { margin-bottom: 12px; }
-  .row.center { justify-content: center; }
-  button { background: var(--accent); color: #06281d; border: 0; border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; font-size: .95rem; }
-  button.stop { background: var(--bad); color: #2b0a0a; }
-  button.secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--grid); }
-  button.mini { padding: 2px 10px; }
-  label { color: var(--muted); font-size: .9rem; display: flex; gap: 6px; align-items: center; }
-  select, input[type=number] { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 6px; }
-  input[type=number] { width: 64px; }
-  .status { color: var(--muted); margin-top: 8px; min-height: 1.2em; font-size: .9rem; }
-  .status.error { color: var(--bad); }
-  .level { height: 8px; background: var(--panel2); border-radius: 4px; overflow: hidden; margin-top: 10px; }
-  .level > div { height: 100%; width: 0%; background: var(--accent); transition: width .05s linear; }
-
-  nav.tabs { display: flex; gap: 6px; overflow-x: auto; margin: 14px 0; padding-bottom: 4px; }
-  nav.tabs button { background: var(--panel); color: var(--muted); padding: 8px 14px; font-size: .9rem; white-space: nowrap; }
-  nav.tabs button.active { background: var(--accent); color: #06281d; }
-  .tab { display: none; }
-  .tab.active { display: block; }
-
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } .big { font-size: 3.5rem !important; } }
-  .panel { background: var(--panel); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-  .grid > .panel { margin-bottom: 0; }
-  .panel.wide { grid-column: 1 / -1; }
-  .panel h2 { margin: 0 0 10px; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  .hero { text-align: center; }
-  .kind { color: var(--muted); font-size: .85rem; text-transform: uppercase; letter-spacing: .1em; min-height: 1.2em; }
-  .big { font-size: 5rem; font-weight: 800; line-height: 1.05; min-height: 5.5rem; transition: opacity .3s; }
-  .big.small { font-size: 2.6rem; min-height: 3rem; }
-  .big.stale { opacity: .35; }
-  .sub { color: var(--muted); min-height: 1.3em; }
-  .note { color: var(--muted); font-size: .85rem; line-height: 1.5; margin: 8px 0 0; }
-  .feedback { font-size: 1.15rem; font-weight: 600; min-height: 1.6em; }
-  .good { color: var(--accent); } .warn { color: var(--warn); } .badc { color: var(--bad); }
-  .hints { color: var(--muted); line-height: 1.6; margin-top: 8px; }
-
-  .meter { position: relative; height: 40px; margin: 18px 0 6px; border-radius: 6px;
-    background: linear-gradient(90deg, var(--bad) 0%, var(--warn) 30%, var(--accent) 45%, var(--accent) 55%, var(--warn) 70%, var(--bad) 100%); opacity: .85; }
-  .meter .center { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; background: var(--text); transform: translateX(-1px); }
-  .meter .needle { position: absolute; top: -6px; bottom: -6px; width: 4px; background: #fff; border-radius: 2px; left: 50%; transform: translateX(-2px); transition: left .08s linear; box-shadow: 0 0 6px #000; }
-  .scale { display: flex; justify-content: space-between; color: var(--muted); font-size: .75rem; }
-  .tuner-note { font-size: 2.6rem; font-weight: 700; text-align: center; }
-  .tuner-info { text-align: center; color: var(--muted); min-height: 1.3em; }
-  .center-text { text-align: center; }
-
-  .chips, .strings, .answers { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
-  .chip { background: var(--panel2); border: 1px solid var(--grid); border-radius: 999px; padding: 6px 12px; font-weight: 600; }
-  .chip.bass { border-color: var(--accent); color: var(--accent); }
-  .chip.ok { border-color: var(--accent); color: var(--accent); }
-  .chip.miss { border-color: var(--bad); color: var(--bad); }
-  .string-btn.done::after { content: ' \2713'; color: var(--accent); }
-  .string-btn.current { outline: 2px solid var(--accent); }
-
-  .chroma { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; align-items: end; height: 120px; }
-  .chroma .bar { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
-  .chroma .fill { background: var(--accent); border-radius: 4px 4px 0 0; height: 0%; transition: height .08s linear; }
-  .chroma .fill.in-chord { background: var(--warn); }
-  .chroma .lbl { text-align: center; font-size: .8rem; color: var(--muted); margin-top: 4px; }
-
-  canvas { width: 100%; height: 200px; display: block; }
-  canvas.trace { height: 280px; border-radius: 8px; background: #11141a; }
-  canvas.strip { height: 150px; border-radius: 8px; background: #11141a; }
-  .diagram { display: flex; justify-content: center; margin-top: 8px; }
-  .diagram svg { width: 170px; height: auto; }
-  .fretboard svg, .keyboard svg { width: 100%; height: auto; display: block; }
-  .fretboard .fb-all { display: none; }
-  .fretboard.show-all .fb-all { display: inline; }
-  .progress { height: 10px; background: var(--panel2); border-radius: 5px; overflow: hidden; margin: 8px 0 12px; }
-  .progress > div { height: 100%; width: 0; background: var(--accent); }
-  .beat-dots { display: flex; gap: 12px; justify-content: center; margin: 14px 0; }
-  .beat-dots span { width: 26px; height: 26px; border-radius: 50%; background: var(--panel2); border: 2px solid var(--grid); }
-  .beat-dots span.on { background: var(--accent); }
-  .beat-dots span.on.accent { background: var(--warn); }
-  .vrow { display: grid; grid-template-columns: 200px 1fr 50px; gap: 10px; align-items: center; margin: 6px 0; }
-  .vbar { height: 10px; background: var(--panel2); border-radius: 5px; overflow: hidden; }
-  .vbar > div { height: 100%; background: var(--accent); }
-  table.results { border-collapse: collapse; width: 100%; margin-top: 12px; font-size: .9rem; }
-  table.results td, table.results th { border-bottom: 1px solid var(--grid); padding: 6px; text-align: left; }
-  footer { color: var(--muted); font-size: .8rem; margin-top: 16px; line-height: 1.5; }
-</style>
+<link rel="stylesheet" href="css/style.css">
+<script defer src="js/music.js"></script>
+<script defer src="js/util.js"></script>
+<script defer src="js/audio.js"></script>
+<script defer src="js/analysis.js"></script>
+<script defer src="js/render.js"></script>
+<script defer src="js/settings.js"></script>
+<script defer src="js/tabs/detect.js"></script>
+<script defer src="js/tabs/tuner.js"></script>
+<script defer src="js/tabs/chords.js"></script>
+<script defer src="js/tabs/fretboard.js"></script>
+<script defer src="js/tabs/rhythm.js"></script>
+<script defer src="js/tabs/trace.js"></script>
+<script defer src="js/tabs/sing.js"></script>
+<script defer src="js/voice-exercises.js"></script>
+<script defer src="js/tabs/workout.js"></script>
+<script defer src="js/tabs/range.js"></script>
+<script defer src="js/tabs/ear.js"></script>
+<script defer src="js/main.js"></script>
 </head>
 <body>
 <main>
   <header>
     <h1>Guitar &amp; Voice Trainer</h1>
     <div class="controls">
-      <label>A4 <input id="a4" type="number" min="400" max="480" value="440"> Hz</label>
-      <label>Gate <input id="gate" type="range" min="-80" max="-25" value="-55"> <span id="gateVal">-55 dB</span></label>
-      <button id="toggle">Start listening</button>
+      <label>A4 <input id="a4" type="number" inputmode="numeric" min="400" max="480" value="440"> Hz</label>
+      <label>Gate <input id="gate" type="range" min="-80" max="-25" value="-55"> <span id="gateVal" class="num">-55 dB</span></label>
+      <button id="toggle" class="toggle-btn">Start listening</button>
     </div>
   </header>
-  <div id="status" class="status">Press "Start listening" and allow microphone access.</div>
+  <div id="status" class="status" role="status">Press "Start listening" and allow microphone access.</div>
   <div class="level"><div id="level"></div></div>
 
-  <nav class="tabs" id="tabs">
+  <nav class="tabs" id="tabs" aria-label="Sections">
     <button data-tab="detect">Detect</button>
     <button data-tab="tuner">Tuner</button>
     <button data-tab="chords">Chord trainer</button>
@@ -119,6 +47,7 @@
     <button data-tab="rhythm">Rhythm</button>
     <button data-tab="trace">Pitch trace</button>
     <button data-tab="sing">Sing</button>
+    <button data-tab="workout">Voice workout</button>
     <button data-tab="range">Vocal range</button>
     <button data-tab="ear">Ear training</button>
   </nav>
@@ -139,8 +68,13 @@
         <h2>Detected</h2>
         <div id="detKind" class="kind"></div>
         <div id="detResult" class="big">–</div>
-        <div id="detSub" class="sub"></div>
+        <div id="detSub" class="sub two-lines"></div>
         <div id="detDiagram" class="diagram"></div>
+      </section>
+      <section class="panel">
+        <h2>Chord names that fit</h2>
+        <div id="detCands" class="cands"></div>
+        <p id="detCandsNote" class="note two-lines"></p>
       </section>
       <section class="panel">
         <h2>Tuner</h2>
@@ -151,11 +85,16 @@
       </section>
       <section class="panel">
         <h2>Notes heard</h2>
-        <div id="detChips" class="chips"></div>
-      </section>
-      <section class="panel">
-        <h2>Pitch classes</h2>
+        <div id="detChips" class="chips fixed-2"></div>
+        <h2 class="spaced">Pitch classes</h2>
         <div id="detChroma" class="chroma"></div>
+      </section>
+      <section class="panel wide">
+        <div class="panel-head">
+          <h2>Recent chords</h2>
+          <button id="detRecentClear" class="secondary mini">Clear</button>
+        </div>
+        <div id="detRecent" class="chips one-line"></div>
       </section>
       <section class="panel wide">
         <h2>Spectrum (60 – 2000 Hz)</h2>
@@ -171,6 +110,8 @@
         <label>Tuning <select id="tunTuning" class="tuning-select"></select></label>
         <label><input type="radio" name="tunMode" value="guided" checked> Guided (one string at a time)</label>
         <label><input type="radio" name="tunMode" value="auto"> Auto (any string)</label>
+      </div>
+      <div class="row">
         <button id="tunRef" class="secondary">Play reference</button>
         <button id="tunReset" class="secondary">Start again</button>
       </div>
@@ -197,14 +138,16 @@
             </select>
           </label>
         </div>
-        <div id="chPractice" class="row center">
-          <button id="chNext">Next chord</button>
-          <button id="chHear" class="secondary">Hear it</button>
-          <label><input type="checkbox" id="chAuto" checked> Next chord when correct</label>
-        </div>
-        <div id="chChanges" class="row center" hidden>
-          <select id="chA" aria-label="First chord"></select> ↔ <select id="chB" aria-label="Second chord"></select>
-          <button id="chStart">Start 60 s</button>
+        <div class="swap">
+          <div id="chPractice" class="row center">
+            <button id="chNext">Next chord</button>
+            <button id="chHear" class="secondary">Hear it</button>
+            <label><input type="checkbox" id="chAuto" checked> Next chord when correct</label>
+          </div>
+          <div id="chChanges" class="row center" hidden>
+            <select id="chA" aria-label="First chord"></select> ↔ <select id="chB" aria-label="Second chord"></select>
+            <button id="chStart" class="toggle-btn">Start 60 s</button>
+          </div>
         </div>
         <div id="chTimer" class="sub"></div>
         <div id="chName" class="big">–</div>
@@ -227,19 +170,21 @@
       <div class="row">
         <label>Tuning <select id="fbTuning" class="tuning-select"></select></label>
         <label><input type="checkbox" id="fbShowAll"> Show all note names</label>
-        <span class="sub">Playing: <b id="fbNow">–</b></span>
+        <span class="sub">Playing: <b id="fbNow" class="num">–</b></span>
       </div>
-      <div id="fbBoard" class="fretboard"></div>
+      <div class="scroll-x"><div id="fbBoard" class="fretboard"></div></div>
     </div>
     <div class="panel">
       <h2>Note game</h2>
       <div class="row">
-        <button id="fbStart">Start game</button>
+        <button id="fbStart" class="toggle-btn">Start game</button>
         <button id="fbSkip" class="secondary">Show answer</button>
         <label><input type="checkbox" id="fbNaturals" checked> Natural notes only</label>
-        <span class="sub">Strings:</span><span id="fbStrings" class="row" style="margin:0"></span>
       </div>
-      <div id="fbPrompt" class="big small"></div>
+      <div class="row">
+        <span class="sub">Strings:</span><span id="fbStrings" class="row tight"></span>
+      </div>
+      <div id="fbPrompt" class="big small prompt"></div>
       <div id="fbFeedback" class="feedback"></div>
       <div id="fbScore" class="sub"></div>
     </div>
@@ -249,8 +194,8 @@
   <section id="tab-rhythm" class="tab">
     <div class="panel">
       <div class="row">
-        <button id="rhToggle">Start metronome</button>
-        <label>BPM <input type="range" id="rhBpm" min="40" max="200" value="80"> <b id="rhBpmVal">80</b></label>
+        <button id="rhToggle" class="toggle-btn wide-toggle">Start metronome</button>
+        <label>BPM <input type="range" id="rhBpm" min="40" max="200" value="80"> <b id="rhBpmVal" class="num">80</b></label>
         <label>Beats per bar
           <select id="rhBeats"><option>2</option><option>3</option><option selected>4</option><option>6</option></select>
         </label>
@@ -262,10 +207,10 @@
       <div id="rhBeatDots" class="beat-dots"></div>
       <div id="rhLast" class="big small center-text">–</div>
       <canvas id="rhStrip" class="strip"></canvas>
-      <div id="rhStats" class="sub center-text"></div>
+      <div id="rhStats" class="sub center-text three-lines"></div>
       <div class="row" style="margin-top:12px">
         <button id="rhCalibrate" class="secondary">Calibrate microphone delay</button>
-        <span id="rhLatency" class="sub"></span>
+        <span id="rhLatency" class="sub rh-latency"></span>
       </div>
       <p class="note">Strum on each click. Green zone = within 40 ms of the beat. Use headphones if you can, so the microphone does not hear the clicks.
       Calibrate once: start the metronome, press "Calibrate" and strum exactly on 8 clicks.</p>
@@ -277,11 +222,11 @@
     <div class="panel">
       <div class="row">
         <div id="trNote" class="tuner-note" style="min-width:110px">–</div>
-        <div id="trInfo" class="sub"></div>
-        <button id="trPause" class="secondary">Pause</button>
+        <div id="trInfo" class="sub grow"></div>
+        <button id="trPause" class="secondary toggle-btn">Pause</button>
       </div>
       <canvas id="trCanvas" class="trace"></canvas>
-      <div id="trStats" class="sub" style="margin-top:8px"></div>
+      <div id="trStats" class="sub two-lines" style="margin-top:8px"></div>
       <p class="note">Sing or play and watch the line. A flat line means a steady note. Shaded lanes are sharps and flats (the black piano keys).</p>
     </div>
   </section>
@@ -299,21 +244,74 @@
         </label>
         <label>Start note <select id="sgRoot"></select></label>
         <label><input type="checkbox" id="sgAnyOctave" checked> Any octave counts</label>
-        <button id="sgStart">Start</button>
+      </div>
+      <div class="row">
+        <button id="sgStart" class="toggle-btn">Start</button>
         <button id="sgReplay" class="secondary">Replay note</button>
         <button id="sgSkip" class="secondary">Skip</button>
       </div>
-      <div class="row">
-        <div id="sgTarget" class="big small" style="min-width:120px">–</div>
-        <div>
+      <div class="row nowrap">
+        <div id="sgTarget" class="big small" style="min-width:110px">–</div>
+        <div class="grow">
           <div id="sgFeedback" class="feedback"></div>
           <div id="sgProgress" class="sub"></div>
         </div>
       </div>
       <div class="progress"><div id="sgHold"></div></div>
       <canvas id="sgCanvas" class="trace"></canvas>
-      <div id="sgResults"></div>
+      <div id="sgResults" class="results-box"></div>
       <p class="note">Listen to the note, then sing it and hold it inside the orange band for 2 seconds. Headphones help.</p>
+    </div>
+  </section>
+
+  <!-- ===== Voice workout ===== -->
+  <section id="tab-workout" class="tab">
+    <div class="panel">
+      <div class="row">
+        <label>Exercise <select id="woExercise"></select></label>
+        <label>Tempo
+          <select id="woTempo">
+            <option value="0.8">Slower</option>
+            <option value="1" selected>Normal</option>
+            <option value="1.2">Faster</option>
+          </select>
+        </label>
+        <label>Keys
+          <select id="woKeys">
+            <option value="0" selected>Default</option>
+            <option value="3">3</option><option value="5">5</option><option value="8">8</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="woGuide" checked> Piano guide</label>
+        <label>Range <select id="woVoice"></select></label>
+      </div>
+      <div class="row">
+        <button id="woStart" class="toggle-btn">Start</button>
+        <button id="woProgram" class="secondary toggle-btn wide-toggle">Daily warm-up</button>
+        <span id="woBest" class="sub grow"></span>
+      </div>
+      <div class="wo-info">
+        <div><b id="woTitle"></b> <span id="woFocus" class="tag"></span></div>
+        <p id="woHow" class="note"></p>
+      </div>
+      <div class="row nowrap wo-now">
+        <div id="woNow" class="big small">–</div>
+        <div class="grow">
+          <div id="woFeedback" class="feedback"></div>
+          <div id="woProgress" class="sub"></div>
+        </div>
+      </div>
+      <div class="progress"><div id="woBar"></div></div>
+      <canvas id="woCanvas" class="trace"></canvas>
+      <div id="woBreath" class="breath" hidden>
+        <div id="woBreathPhase" class="big small">–</div>
+        <div id="woBreathCount" class="breath-count">–</div>
+      </div>
+      <h2 class="spaced">Score per key</h2>
+      <div id="woKeysScore" class="chips"></div>
+      <div id="woTips" class="hints short"></div>
+      <p class="note">Your range comes from the Vocal range tab; if you have not measured it, pick a voice type. The piano gives each key with a chord, then plays the notes with you.
+        Any octave counts. Use headphones, or turn the piano guide off, so the microphone hears only your voice.</p>
     </div>
   </section>
 
@@ -321,19 +319,20 @@
   <section id="tab-range" class="tab">
     <div class="panel">
       <p class="note" style="margin-top:0">Press Start. Sing down to your lowest comfortable note and hold it for half a second. Then sing up to your highest comfortable note and hold it.
-      Do not strain. Press Save when you are done. The Sing and Ear training tabs use the saved range.</p>
+      Do not strain. Press Save when you are done. The Sing, Voice workout and Ear training tabs use the saved range.</p>
       <div class="row">
-        <button id="rgStart">Start</button>
+        <button id="rgStart" class="toggle-btn">Start</button>
         <button id="rgSave" class="secondary">Save range</button>
         <button id="rgReset" class="secondary">Reset</button>
       </div>
       <div class="row">
-        <span>Lowest: <button class="secondary mini" id="rgLowDown">−</button> <b id="rgLow">–</b> <button class="secondary mini" id="rgLowUp">+</button></span>
-        <span>Highest: <button class="secondary mini" id="rgHighDown">−</button> <b id="rgHigh">–</b> <button class="secondary mini" id="rgHighUp">+</button></span>
-        <span class="sub">Now: <b id="rgNow">–</b></span>
+        <span class="nudge">Lowest: <button class="secondary mini" id="rgLowDown" aria-label="Lower">−</button> <b id="rgLow" class="num">–</b> <button class="secondary mini" id="rgLowUp" aria-label="Higher">+</button></span>
+        <span class="nudge">Highest: <button class="secondary mini" id="rgHighDown" aria-label="Lower">−</button> <b id="rgHigh" class="num">–</b> <button class="secondary mini" id="rgHighUp" aria-label="Higher">+</button></span>
+        <span class="sub">Now: <b id="rgNow" class="num">–</b></span>
       </div>
-      <div id="rgKeyboard" class="keyboard"></div>
+      <div class="scroll-x"><div id="rgKeyboard" class="keyboard"></div></div>
       <div id="rgSummary" class="feedback" style="margin-top:12px"></div>
+      <h2 class="spaced">Overlap with reference voice ranges</h2>
       <div id="rgVoices"></div>
       <p class="note">Voice categories are rough guides from choir singing. They are not tied to gender or age, and many voices fit more than one.
       Your comfortable range can grow with practice.</p>
@@ -364,7 +363,7 @@
         <button id="erReplay" class="secondary">Play again</button>
         <button id="erReveal" class="secondary">Show answer</button>
       </div>
-      <div id="erPrompt" class="sub"></div>
+      <div id="erPrompt" class="sub two-lines"></div>
       <div id="erAnswers" class="answers" style="margin-top:12px"></div>
       <div id="erFeedback" class="feedback" style="margin-top:12px"></div>
       <div id="erScore" class="sub"></div>
@@ -372,1778 +371,10 @@
   </section>
 
   <footer>
-    All sound processing happens in your browser. The app does not record or send audio.
+    All sound processing happens in your browser. The app does not record or send audio, and there is no server: settings and scores stay in this browser.
     The app turns off the browser's echo cancellation, noise suppression and auto gain, because they distort the sound.
     Detection is heuristic: some voicings, very soft notes or strong overtones can give a wrong result.
   </footer>
 </main>
-
-<script>
-'use strict';
-
-// ===================== Music data =====================
-const NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
-const NATURAL = [true, false, true, false, true, true, false, true, false, true, false, true];
-const INTERVALS = ['Unison', 'Minor 2nd', 'Major 2nd', 'Minor 3rd', 'Major 3rd', 'Perfect 4th', 'Tritone',
-  'Perfect 5th', 'Minor 6th', 'Major 6th', 'Minor 7th', 'Major 7th', 'Octave'];
-
-// Order matters on equal score: earlier entries win.
-const CHORD_TYPES = [
-  { suffix: '',      name: 'major',             intervals: [0, 4, 7] },
-  { suffix: 'm',     name: 'minor',             intervals: [0, 3, 7] },
-  { suffix: '7',     name: 'dominant 7th',      intervals: [0, 4, 7, 10] },
-  { suffix: 'maj7',  name: 'major 7th',         intervals: [0, 4, 7, 11] },
-  { suffix: 'm7',    name: 'minor 7th',         intervals: [0, 3, 7, 10] },
-  { suffix: '6',     name: 'major 6th',         intervals: [0, 4, 7, 9] },
-  { suffix: 'm6',    name: 'minor 6th',         intervals: [0, 3, 7, 9] },
-  { suffix: 'add9',  name: 'add 9',             intervals: [0, 2, 4, 7] },
-  { suffix: 'sus2',  name: 'suspended 2nd',     intervals: [0, 2, 7] },
-  { suffix: 'sus4',  name: 'suspended 4th',     intervals: [0, 5, 7] },
-  { suffix: '7sus4', name: '7th suspended 4th', intervals: [0, 5, 7, 10] },
-  { suffix: 'dim',   name: 'diminished',        intervals: [0, 3, 6] },
-  { suffix: 'dim7',  name: 'diminished 7th',    intervals: [0, 3, 6, 9] },
-  { suffix: 'm7b5',  name: 'half-diminished',   intervals: [0, 3, 6, 10] },
-  { suffix: 'aug',   name: 'augmented',         intervals: [0, 4, 8] },
-  { suffix: '5',     name: 'power chord',       intervals: [0, 7] },
-];
-
-// MIDI notes from the 6th (low) string to the 1st (high) string.
-const TUNINGS = {
-  standard: { name: 'Standard (E A D G B E)', midis: [40, 45, 50, 55, 59, 64] },
-  dropD:    { name: 'Drop D (D A D G B E)', midis: [38, 45, 50, 55, 59, 64] },
-  halfDown: { name: 'Half step down (Eb Ab Db Gb Bb Eb)', midis: [39, 44, 49, 54, 58, 63] },
-  dadgad:   { name: 'DADGAD', midis: [38, 45, 50, 55, 57, 62] },
-  openG:    { name: 'Open G (D G D G B D)', midis: [38, 43, 50, 55, 59, 62] },
-};
-const STANDARD = TUNINGS.standard.midis;
-
-// Shapes use standard tuning. Arrays run from the 6th string to the 1st. X = do not play.
-const X = -1;
-const CHORD_SHAPES = {
-  C:     { frets: [X, 3, 2, 0, 1, 0], fingers: [0, 3, 2, 0, 1, 0] },
-  A:     { frets: [X, 0, 2, 2, 2, 0], fingers: [0, 0, 1, 2, 3, 0] },
-  G:     { frets: [3, 2, 0, 0, 0, 3], fingers: [2, 1, 0, 0, 0, 3] },
-  E:     { frets: [0, 2, 2, 1, 0, 0], fingers: [0, 2, 3, 1, 0, 0] },
-  D:     { frets: [X, X, 0, 2, 3, 2], fingers: [0, 0, 0, 1, 3, 2] },
-  Am:    { frets: [X, 0, 2, 2, 1, 0], fingers: [0, 0, 2, 3, 1, 0] },
-  Em:    { frets: [0, 2, 2, 0, 0, 0], fingers: [0, 2, 3, 0, 0, 0] },
-  Dm:    { frets: [X, X, 0, 2, 3, 1], fingers: [0, 0, 0, 2, 3, 1] },
-  A7:    { frets: [X, 0, 2, 0, 2, 0], fingers: [0, 0, 2, 0, 3, 0] },
-  D7:    { frets: [X, X, 0, 2, 1, 2], fingers: [0, 0, 0, 2, 1, 3] },
-  E7:    { frets: [0, 2, 0, 1, 0, 0], fingers: [0, 2, 0, 1, 0, 0] },
-  G7:    { frets: [3, 2, 0, 0, 0, 1], fingers: [3, 2, 0, 0, 0, 1] },
-  C7:    { frets: [X, 3, 2, 3, 1, 0], fingers: [0, 3, 2, 4, 1, 0] },
-  B7:    { frets: [X, 2, 1, 2, 0, 2], fingers: [0, 2, 1, 3, 0, 4] },
-  Am7:   { frets: [X, 0, 2, 0, 1, 0], fingers: [0, 0, 2, 0, 1, 0] },
-  Em7:   { frets: [0, 2, 0, 0, 0, 0], fingers: [0, 2, 0, 0, 0, 0] },
-  Dm7:   { frets: [X, X, 0, 2, 1, 1], fingers: [0, 0, 0, 2, 1, 1] },
-  Cmaj7: { frets: [X, 3, 2, 0, 0, 0], fingers: [0, 3, 2, 0, 0, 0] },
-  Fmaj7: { frets: [X, X, 3, 2, 1, 0], fingers: [0, 0, 3, 2, 1, 0] },
-  Asus2: { frets: [X, 0, 2, 2, 0, 0], fingers: [0, 0, 1, 2, 0, 0] },
-  Asus4: { frets: [X, 0, 2, 2, 3, 0], fingers: [0, 0, 1, 2, 3, 0] },
-  Dsus2: { frets: [X, X, 0, 2, 3, 0], fingers: [0, 0, 0, 1, 3, 0] },
-  Dsus4: { frets: [X, X, 0, 2, 3, 3], fingers: [0, 0, 0, 1, 2, 3] },
-  Cadd9: { frets: [X, 3, 2, 0, 3, 0], fingers: [0, 2, 1, 0, 3, 0] },
-  E5:    { frets: [0, 2, 2, X, X, X], fingers: [0, 1, 2, 0, 0, 0] },
-  A5:    { frets: [X, 0, 2, 2, X, X], fingers: [0, 0, 1, 2, 0, 0] },
-  G5:    { frets: [3, 5, 5, X, X, X], fingers: [1, 3, 4, 0, 0, 0] },
-  F:     { frets: [1, 3, 3, 2, 1, 1], fingers: [1, 3, 4, 2, 1, 1] },
-  Bm:    { frets: [X, 2, 4, 4, 3, 2], fingers: [0, 1, 3, 4, 2, 1] },
-};
-const CHORD_SETS = {
-  beginner: { name: 'Beginner open chords', chords: ['C', 'A', 'G', 'E', 'D', 'Am', 'Em', 'Dm'] },
-  seventh:  { name: '7th chords', chords: ['A7', 'D7', 'E7', 'G7', 'C7', 'B7', 'Am7', 'Em7', 'Dm7', 'Cmaj7', 'Fmaj7'] },
-  sus:      { name: 'Sus and add chords', chords: ['Asus2', 'Asus4', 'Dsus2', 'Dsus4', 'Cadd9'] },
-  power:    { name: 'Power chords', chords: ['E5', 'A5', 'G5'] },
-  barre:    { name: 'Barre chords', chords: ['F', 'Bm'] },
-  all:      { name: 'All chords', chords: Object.keys(CHORD_SHAPES) },
-};
-// Approximate choir ranges, used only as a reference.
-const VOICE_RANGES = [
-  { name: 'Bass', low: 40, high: 64 },
-  { name: 'Baritone', low: 43, high: 67 },
-  { name: 'Tenor', low: 48, high: 72 },
-  { name: 'Alto', low: 53, high: 77 },
-  { name: 'Mezzo-soprano', low: 57, high: 81 },
-  { name: 'Soprano', low: 60, high: 84 },
-];
-
-// ===================== Settings =====================
-const FFT_SIZE = 32768;     // ~1.5 Hz per bin at 48 kHz: separates low E (82 Hz) from F (87 Hz)
-const PITCH_WINDOW = 4096;  // samples used for the time-domain pitch tracker
-const MIN_HZ = 60, MAX_HZ = 1400;
-const ONSET_JUMP_DB = 6;    // a rise this large in the short-term level is a new strum or pluck
-const CHROMA_LAG = 0.3;     // the long FFT window shows a new strum this many seconds late
-const HISTORY_LEN = 8;      // frames used to vote for a stable result in the Detect tab
-const HOLD_SEC = 1.5;       // keep the last Detect result visible this long after the sound stops
-
-// ===================== Helpers =====================
-const $ = id => document.getElementById(id);
-const store = {
-  get(key, fallback) {
-    try {
-      const v = localStorage.getItem('gvt.' + key);
-      return v === null ? fallback : JSON.parse(v);
-    } catch { return fallback; }
-  },
-  set(key, value) {
-    try { localStorage.setItem('gvt.' + key, JSON.stringify(value)); } catch { /* storage unavailable */ }
-  },
-};
-
-const a4 = () => Number($('a4').value) || 440;
-const midiToFreq = m => a4() * Math.pow(2, (m - 69) / 12);
-const freqToMidi = f => 69 + 12 * Math.log2(f / a4());
-const pcOf = m => ((Math.round(m) % 12) + 12) % 12;
-const pitchClass = f => pcOf(freqToMidi(f));
-const noteName = m => NOTE_NAMES[pcOf(m)] + (Math.floor(Math.round(m) / 12) - 1);
-const ordinal = n => n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[n] || 'th');
-const stringLabel = i => `${ordinal(6 - i)} string`;
-const fmtCents = c => `${c > 0 ? '+' : ''}${Math.round(c)} cents`;
-const randInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
-const pick = arr => arr[Math.floor(Math.random() * arr.length)];
-const median = arr => { const s = [...arr].sort((a, b) => a - b); const k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
-const mean = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
-const stdDev = arr => { const m = mean(arr); return Math.sqrt(mean(arr.map(v => (v - m) ** 2))); };
-// Moves a target note to the octave nearest the sung note.
-const foldToOctave = (sung, target) => target + 12 * Math.round((sung - target) / 12);
-
-function noteInfo(freq) {
-  const midiFloat = freqToMidi(freq);
-  const midi = Math.round(midiFloat);
-  return {
-    midi,
-    name: NOTE_NAMES[pcOf(midi)],
-    octave: Math.floor(midi / 12) - 1,
-    cents: Math.round((midiFloat - midi) * 100),
-  };
-}
-
-function setStatus(text, isError = false) {
-  $('status').textContent = text;
-  $('status').classList.toggle('error', isError);
-}
-
-function setFeedback(el, text, cls = '') {
-  el.textContent = text;
-  el.className = el.className.replace(/\b(good|warn|badc)\b/g, '').trim() + (cls ? ' ' + cls : '');
-}
-
-function setNeedle(el, cents) {
-  el.style.left = (50 + Math.max(-50, Math.min(50, cents))) + '%';
-}
-
-function rmsDb(buf) {
-  let sum = 0;
-  for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
-  return 10 * Math.log10(sum / buf.length + 1e-12);
-}
-
-function prepCanvas(canvas) {
-  const dpr = window.devicePixelRatio || 1;
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-  }
-  const g = canvas.getContext('2d');
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.clearRect(0, 0, w, h);
-  return { g, w, h };
-}
-
-// Reports a note once, after it has been held long enough.
-class HoldDetector {
-  constructor(holdSec, tolCents = 50, graceSec = 0.15) {
-    Object.assign(this, { holdSec, tolCents, graceSec });
-    this.reset();
-  }
-  reset() { this.note = null; this.since = 0; this.lastSeen = 0; this.fired = false; }
-  update(time, midi) {
-    const valid = midi !== null && Math.abs(midi - Math.round(midi)) * 100 <= this.tolCents;
-    if (!valid) {
-      if (this.note !== null && time - this.lastSeen > this.graceSec) this.reset();
-      return null;
-    }
-    const n = Math.round(midi);
-    if (n !== this.note) { this.note = n; this.since = time; this.fired = false; }
-    this.lastSeen = time;
-    if (!this.fired && time - this.since >= this.holdSec) { this.fired = true; return n; }
-    return null;
-  }
-}
-
-// ===================== Audio engine =====================
-let audioCtx = null;
-const mic = { stream: null, source: null, analyser: null, lpAnalyser: null, freqData: null, timeData: null, lpData: null };
-let muteInputUntil = 0;   // in audioCtx time; the app ignores the microphone while it plays a sound
-
-function getCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
-
-async function startMic() {
-  if (!navigator.mediaDevices?.getUserMedia) {
-    setStatus('This browser does not support microphone access.', true);
-    return;
-  }
-  let stream;
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-    });
-  } catch (err) {
-    setStatus('Microphone access failed: ' + err.message, true);
-    return;
-  }
-  const ctx = getCtx();
-  const source = ctx.createMediaStreamSource(stream);
-  const analyser = ctx.createAnalyser();
-  analyser.fftSize = FFT_SIZE;
-  analyser.smoothingTimeConstant = 0;
-  source.connect(analyser);
-
-  // A low-passed copy for onset (strum) detection, so metronome clicks count less.
-  const lp1 = ctx.createBiquadFilter();
-  const lp2 = ctx.createBiquadFilter();
-  lp1.type = lp2.type = 'lowpass';
-  lp1.frequency.value = lp2.frequency.value = 1200;
-  const lpAnalyser = ctx.createAnalyser();
-  lpAnalyser.fftSize = 2048;
-  source.connect(lp1).connect(lp2).connect(lpAnalyser);
-
-  Object.assign(mic, {
-    stream, source, analyser, lpAnalyser,
-    freqData: new Float32Array(analyser.frequencyBinCount),
-    timeData: new Float32Array(analyser.fftSize),
-    lpData: new Float32Array(lpAnalyser.fftSize),
-  });
-  $('toggle').textContent = 'Stop listening';
-  $('toggle').classList.add('stop');
-  setStatus(`Listening (${ctx.sampleRate} Hz).`);
-}
-
-function stopMic() {
-  mic.stream?.getTracks().forEach(t => t.stop());
-  mic.source?.disconnect();
-  Object.assign(mic, { stream: null, source: null, analyser: null, lpAnalyser: null });
-  $('toggle').textContent = 'Start listening';
-  $('toggle').classList.remove('stop');
-  setStatus('Stopped.');
-}
-
-// Plays a note with a few harmonics. Returns the seconds until it ends.
-function playNote(midi, { dur = 1, when = 0, gain = 0.2, sustain = false } = {}) {
-  const ctx = getCtx();
-  const t0 = ctx.currentTime + 0.03 + when;
-  const freq = midiToFreq(midi);
-  const out = ctx.createGain();
-  out.gain.setValueAtTime(0.0001, t0);
-  out.gain.exponentialRampToValueAtTime(gain, t0 + 0.015);
-  if (sustain) out.gain.setValueAtTime(gain, t0 + dur - 0.15);
-  out.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  out.connect(ctx.destination);
-  [1, 0.45, 0.22, 0.1, 0.05].forEach((amp, i) => {
-    const osc = ctx.createOscillator();
-    osc.frequency.value = freq * (i + 1);
-    const g = ctx.createGain();
-    g.gain.value = amp;
-    osc.connect(g).connect(out);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.05);
-  });
-  muteInputUntil = Math.max(muteInputUntil, t0 + dur + 0.3);
-  return t0 + dur - ctx.currentTime;
-}
-
-// Plays the notes with a short delay between them, like a strum.
-function playChord(midis, { dur = 2, when = 0 } = {}) {
-  let end = 0;
-  midis.forEach((m, i) => {
-    end = Math.max(end, playNote(m, { dur, when: when + i * 0.03, gain: 0.3 / Math.sqrt(midis.length) }));
-  });
-  return end;
-}
-
-function playClick(time, accent) {
-  const ctx = getCtx();
-  const osc = ctx.createOscillator();
-  osc.frequency.value = accent ? 3200 : 2400;
-  const g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001, time);
-  g.gain.exponentialRampToValueAtTime(accent ? 0.5 : 0.3, time + 0.002);
-  g.gain.exponentialRampToValueAtTime(0.0001, time + 0.04);
-  osc.connect(g).connect(ctx.destination);
-  osc.start(time);
-  osc.stop(time + 0.05);
-}
-
-// ===================== Analysis =====================
-// Finds local maxima in the dB spectrum. Searches above MAX_HZ too, so overtones of high notes are seen.
-function findPeaks() {
-  const freqData = mic.freqData;
-  const binHz = audioCtx.sampleRate / mic.analyser.fftSize;
-  const lo = Math.max(2, Math.floor(MIN_HZ / binHz));
-  const hi = Math.min(freqData.length - 3, Math.ceil(MAX_HZ * 1.5 / binHz));
-  let maxDb = -Infinity;
-  for (let i = lo; i <= hi; i++) if (freqData[i] > maxDb) maxDb = freqData[i];
-  const threshold = maxDb - 30;
-
-  const peaks = [];
-  for (let i = lo; i <= hi; i++) {
-    const v = freqData[i];
-    if (v < threshold) continue;
-    if (v > freqData[i - 1] && v >= freqData[i + 1] && v > freqData[i - 2] && v >= freqData[i + 2]) {
-      const a = freqData[i - 1], c = freqData[i + 1];
-      const denom = a - 2 * v + c;
-      const shift = denom ? 0.5 * (a - c) / denom : 0;   // parabolic interpolation
-      const db = v - 0.25 * (a - c) * shift;
-      peaks.push({ freq: (i + shift) * binHz, db, amp: Math.pow(10, db / 20) });
-    }
-  }
-  peaks.sort((x, y) => y.amp - x.amp);
-  peaks.length = Math.min(peaks.length, 24);
-  peaks.sort((x, y) => x.freq - y.freq);
-  return peaks;
-}
-
-// Groups peaks into notes: a peak near an integer multiple of a lower note is its overtone.
-function findFundamentals(peaks) {
-  const notes = [];
-  for (const p of peaks) {
-    let owner = null;
-    for (const n of notes) {
-      const ratio = p.freq / n.freq;
-      const h = Math.round(ratio);
-      if (h >= 2 && h <= 10 && Math.abs(ratio - h) / h < 0.03) { owner = n; break; }
-    }
-    if (owner) owner.energy += p.amp;
-    else if (p.freq <= MAX_HZ) notes.push({ freq: p.freq, amp: p.amp, energy: p.amp });
-  }
-  const maxEnergy = Math.max(0, ...notes.map(n => n.energy));
-  return notes.filter(n => n.energy >= 0.15 * maxEnergy);
-}
-
-// McLeod Pitch Method.
-function detectPitch(buf, sampleRate) {
-  const n = buf.length;
-  const maxLag = Math.min(n >> 1, Math.floor(sampleRate / MIN_HZ));
-  const minLag = Math.floor(sampleRate / MAX_HZ);
-  const nsdf = new Float32Array(maxLag + 2);
-  for (let tau = 0; tau <= maxLag + 1; tau++) {
-    let acf = 0, m = 0;
-    for (let j = 0, end = n - tau; j < end; j++) {
-      const a = buf[j], b = buf[j + tau];
-      acf += a * b;
-      m += a * a + b * b;
-    }
-    nsdf[tau] = m > 0 ? 2 * acf / m : 0;
-  }
-
-  const maxima = [];
-  let tau = 0;
-  while (tau < maxLag && nsdf[tau] > 0) tau++;
-  while (tau < maxLag) {
-    while (tau < maxLag && nsdf[tau] <= 0) tau++;
-    let best = -1, bestTau = -1;
-    while (tau < maxLag && nsdf[tau] > 0) {
-      if (nsdf[tau] > best) { best = nsdf[tau]; bestTau = tau; }
-      tau++;
-    }
-    if (bestTau >= minLag) maxima.push(bestTau);
-  }
-  if (!maxima.length) return null;
-
-  const highest = Math.max(...maxima.map(t => nsdf[t]));
-  const chosen = maxima.find(t => nsdf[t] >= 0.9 * highest);
-  const a = nsdf[chosen - 1], b = nsdf[chosen], c = nsdf[chosen + 1];
-  const denom = a - 2 * b + c;
-  const shift = denom ? 0.5 * (a - c) / denom : 0;
-  return { freq: sampleRate / (chosen + shift), clarity: b };
-}
-
-function matchChord(chromaVec, bassPc) {
-  const max = Math.max(...chromaVec);
-  if (max <= 0) return null;
-  const c = Array.from(chromaVec, v => (v / max < 0.1 ? 0 : v / max));
-
-  let best = null;
-  for (let root = 0; root < 12; root++) {
-    if (c[root] < 0.2) continue;
-    for (const type of CHORD_TYPES) {
-      const members = new Set(type.intervals.map(i => (root + i) % 12));
-      let inside = 0, outside = 0;
-      const missing = [];
-      for (let pc = 0; pc < 12; pc++) {
-        if (members.has(pc)) {
-          inside += c[pc];
-          if (c[pc] < 0.15) missing.push((pc - root + 12) % 12);
-        } else {
-          outside += c[pc];
-        }
-      }
-      // Only a 4-note chord may drop its perfect fifth.
-      const allowed = missing.length === 0 ||
-        (type.intervals.length >= 4 && missing.length === 1 && missing[0] === 7);
-      if (!allowed) continue;
-
-      let score = inside - 1.2 * outside - 0.6 * missing.length - 0.08 * type.intervals.length;
-      if (bassPc === root) score += 0.35;
-      else if (bassPc !== null && members.has(bassPc)) score += 0.1;
-      else if (bassPc !== null) score -= 0.2;
-
-      if (!best || score > best.score) best = { root, type, score, members };
-    }
-  }
-  if (!best || best.score < 1.2) return null;
-
-  const slash = bassPc !== null && bassPc !== best.root && best.members.has(bassPc);
-  best.label = NOTE_NAMES[best.root] + best.type.suffix + (slash ? '/' + NOTE_NAMES[bassPc] : '');
-  best.description = `${NOTE_NAMES[best.root]} ${best.type.name}` + (slash ? `, ${NOTE_NAMES[bassPc]} in the bass` : '');
-  return best;
-}
-
-// Compares heard pitch classes with the expected set.
-function checkPitchClasses(chromaVec, expected) {
-  const max = Math.max(...chromaVec);
-  if (max <= 0) return { ok: false, missing: [...expected], extra: [] };
-  const norm = Array.from(chromaVec, v => v / max);
-  const missing = [...expected].filter(pc => norm[pc] < 0.2);
-  const extra = [];
-  for (let pc = 0; pc < 12; pc++) if (!expected.has(pc) && norm[pc] > 0.35) extra.push(pc);
-  return { ok: !missing.length && !extra.length, missing, extra };
-}
-
-const shapeNotes = shape => shape.frets.map((f, i) => (f === X ? null : STANDARD[i] + f));
-const shapePcs = shape => new Set(shapeNotes(shape).filter(m => m !== null).map(pcOf));
-
-// ----- Per-frame state -----
-const chroma = new Float32Array(12);
-const onsetState = { baseDb: -120, last: -1 };
-let chromaResetAt = null;
-const midiHistory = [];
-
-// Finds a sudden rise in the low-passed level. Returns the onset time in audioCtx seconds, or null.
-function detectOnset(ctxTime, gateDb) {
-  const buf = mic.lpData;
-  mic.lpAnalyser.getFloatTimeDomainData(buf);
-  const envDb = rmsDb(buf.subarray(buf.length - 512));
-  const st = onsetState;
-  const threshold = st.baseDb + ONSET_JUMP_DB;
-  let onset = null;
-  if (envDb > threshold && envDb > gateDb) {
-    // Find where the rise starts inside the buffer, for better timing.
-    let start = buf.length - 64;
-    for (let i = 0; i + 64 <= buf.length; i += 64) {
-      if (rmsDb(buf.subarray(i, i + 64)) > threshold) { start = i; break; }
-    }
-    const t = ctxTime - (buf.length - start) / audioCtx.sampleRate;
-    if (t - st.last > 0.1) { onset = t; st.last = t; }
-    st.baseDb = envDb;
-  } else {
-    st.baseDb = envDb < st.baseDb ? envDb : st.baseDb + 0.3 * (envDb - st.baseDb);
-  }
-  return onset;
-}
-
-function updateChroma(notes, time) {
-  const frame = new Float32Array(12);
-  for (const n of notes) frame[pitchClass(n.freq)] += n.energy;
-  const max = Math.max(...frame) || 1;
-  for (let i = 0; i < 12; i++) frame[i] /= max;
-  if (chromaResetAt !== null && time >= chromaResetAt) {
-    chroma.set(frame);
-    chromaResetAt = null;
-    return true;
-  }
-  for (let i = 0; i < 12; i++) chroma[i] = 0.6 * chroma[i] + 0.4 * frame[i];
-  return false;
-}
-
-function smoothMidi(m) {
-  if (m === null) { midiHistory.length = 0; return null; }
-  midiHistory.push(m);
-  if (midiHistory.length > 5) midiHistory.shift();
-  return median(midiHistory);
-}
-
-function analyse(wantSpectrum) {
-  const frame = {
-    time: performance.now() / 1000, levelDb: -120, audible: false, muted: false,
-    pitch: null, midi: null, peaks: [], notes: [], bassPc: null, onset: null, chromaReset: false, spectrum: null,
-  };
-  if (!mic.analyser) return frame;
-  const ctx = audioCtx;
-  mic.analyser.getFloatTimeDomainData(mic.timeData);
-  const pitchBuf = mic.timeData.subarray(mic.timeData.length - PITCH_WINDOW);
-  frame.levelDb = rmsDb(pitchBuf);
-  if (wantSpectrum) {
-    mic.analyser.getFloatFrequencyData(mic.freqData);
-    frame.spectrum = mic.freqData;
-  }
-  const gate = Number($('gate').value);
-  const onset = detectOnset(ctx.currentTime, gate);
-  if (ctx.currentTime < muteInputUntil) {
-    frame.muted = true;
-    for (let i = 0; i < 12; i++) chroma[i] *= 0.9;
-    return frame;
-  }
-  frame.onset = onset;
-  if (onset !== null) chromaResetAt = frame.time + CHROMA_LAG;
-  frame.audible = frame.levelDb >= gate;
-  if (!frame.audible) {
-    for (let i = 0; i < 12; i++) chroma[i] *= 0.9;
-    return frame;
-  }
-  frame.pitch = detectPitch(pitchBuf, ctx.sampleRate);
-  if (frame.pitch && frame.pitch.clarity >= 0.8) frame.midi = freqToMidi(frame.pitch.freq);
-  if (wantSpectrum) {
-    frame.peaks = findPeaks();
-    frame.notes = findFundamentals(frame.peaks);
-    frame.chromaReset = updateChroma(frame.notes, frame.time);
-    frame.bassPc = frame.notes.length ? pitchClass(frame.notes[0].freq) : null;
-  }
-  return frame;
-}
-
-// ===================== Shared renderers =====================
-function chordDiagramSvg(shape) {
-  const played = shape.frets.filter(f => f > 0);
-  const maxFret = Math.max(0, ...played);
-  const base = maxFret > 4 ? Math.min(...played) : 1;
-  const left = 30, top = 42, sx = 22, sy = 28, frets = 5;
-  const W = left + sx * 5 + 20, H = top + sy * frets + 30;
-  const xOf = i => left + i * sx;
-  const yOf = f => top + (f - base + 0.5) * sy;
-  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chord diagram">`;
-  if (base === 1) s += `<rect x="${left - 1}" y="${top - 5}" width="${sx * 5 + 2}" height="5" fill="#e8eaf0"/>`;
-  else s += `<text x="${left - 8}" y="${top + sy * 0.65}" fill="#8a90a0" font-size="12" text-anchor="end">${base}fr</text>`;
-  for (let i = 0; i <= frets; i++) s += `<line x1="${left}" x2="${left + sx * 5}" y1="${top + i * sy}" y2="${top + i * sy}" stroke="#555b69" stroke-width="1.5"/>`;
-  for (let i = 0; i < 6; i++) s += `<line x1="${xOf(i)}" x2="${xOf(i)}" y1="${top}" y2="${top + frets * sy}" stroke="#8a90a0" stroke-width="1.5"/>`;
-
-  // A barre: finger 1 on several strings at the same fret.
-  const ones = shape.frets.map((f, i) => ({ f, i })).filter(o => shape.fingers[o.i] === 1 && o.f > 0);
-  if (ones.length >= 2 && ones.every(o => o.f === ones[0].f)) {
-    const a = ones[0].i, b = ones[ones.length - 1].i;
-    s += `<rect x="${xOf(a) - 9}" y="${yOf(ones[0].f) - 9}" width="${xOf(b) - xOf(a) + 18}" height="18" rx="9" fill="#4fd1a5"/>`;
-  }
-  shape.frets.forEach((f, i) => {
-    const x = xOf(i);
-    if (f === X) s += `<text x="${x}" y="${top - 12}" fill="#fc8181" font-size="15" text-anchor="middle">×</text>`;
-    else if (f === 0) s += `<circle cx="${x}" cy="${top - 17}" r="6" fill="none" stroke="#e8eaf0" stroke-width="1.5"/>`;
-    else {
-      s += `<circle cx="${x}" cy="${yOf(f)}" r="9" fill="#4fd1a5"/>`;
-      if (shape.fingers[i]) s += `<text x="${x}" y="${yOf(f) + 4}" fill="#06281d" font-size="12" font-weight="700" text-anchor="middle">${shape.fingers[i]}</text>`;
-    }
-    if (f !== X) s += `<text x="${x}" y="${top + frets * sy + 18}" fill="#8a90a0" font-size="11" text-anchor="middle">${NOTE_NAMES[pcOf(STANDARD[i] + f)]}</text>`;
-  });
-  return s + '</svg>';
-}
-
-function keyboardSvg(from, to, low, high, now) {
-  const whites = [];
-  for (let m = from; m <= to; m++) if (NATURAL[pcOf(m)]) whites.push(m);
-  const W = 1000, H = 130, ww = W / whites.length, bw = ww * 0.6, bh = 80;
-  const inRange = m => (low !== null && high !== null) ? m >= low && m <= high : (m === low || m === high);
-  const fill = (m, black) => m === now ? '#f6ad55' : inRange(m) ? (black ? '#2c8f6f' : '#4fd1a5') : (black ? '#111' : '#e8eaf0');
-  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Piano keyboard">`;
-  whites.forEach((m, i) => {
-    s += `<rect x="${i * ww}" y="0" width="${ww}" height="${H}" fill="${fill(m, false)}" stroke="#0f1115"/>`;
-    if (pcOf(m) === 0) s += `<text x="${i * ww + ww / 2}" y="${H - 8}" fill="#333" font-size="12" text-anchor="middle">${noteName(m)}</text>`;
-  });
-  let wi = 0;
-  for (let m = from; m <= to; m++) {
-    if (NATURAL[pcOf(m)]) { wi++; continue; }
-    s += `<rect x="${wi * ww - bw / 2}" y="0" width="${bw}" height="${bh}" fill="${fill(m, true)}" stroke="#0f1115"/>`;
-  }
-  return s + '</svg>';
-}
-
-// A scrolling pitch-over-time graph on note lanes.
-class PitchTrace {
-  constructor(canvas, seconds = 8, span = 14) {
-    this.canvas = canvas;
-    this.seconds = seconds;
-    this.points = [];
-    this.target = null;
-    this.lo = 50;
-    this.hi = 50 + span;
-  }
-  push(time, midi) {
-    this.points.push({ time, midi });
-    while (this.points.length && this.points[0].time < time - this.seconds) this.points.shift();
-    if (midi !== null) this.follow(midi);
-  }
-  follow(m) {
-    const span = this.hi - this.lo;
-    if (m < this.lo + 1) { this.lo = Math.floor(m) - 2; this.hi = this.lo + span; }
-    else if (m > this.hi - 1) { this.hi = Math.ceil(m) + 2; this.lo = this.hi - span; }
-  }
-  setTarget(m) {
-    this.target = m;
-    if (m !== null) this.follow(m);
-  }
-  clear() { this.points = []; }
-  draw(now) {
-    const { g, w, h } = prepCanvas(this.canvas);
-    const labelW = 44, plotW = w - labelW;
-    const span = this.hi - this.lo, laneH = h / span;
-    const yOf = m => h - ((m - this.lo) / span) * h;
-    g.font = '11px system-ui';
-    for (let n = Math.ceil(this.lo); n <= Math.floor(this.hi); n++) {
-      const y = yOf(n);
-      if (!NATURAL[pcOf(n)]) { g.fillStyle = '#171a21'; g.fillRect(labelW, y - laneH / 2, plotW, laneH); }
-      g.strokeStyle = pcOf(n) === 0 ? '#3a4150' : '#20242d';
-      g.beginPath(); g.moveTo(labelW, y); g.lineTo(w, y); g.stroke();
-      g.fillStyle = NATURAL[pcOf(n)] ? '#8a90a0' : '#555b69';
-      g.fillText(noteName(n), 4, y + 4);
-    }
-    if (this.target !== null) {
-      g.fillStyle = 'rgba(246,173,85,0.22)';
-      g.fillRect(labelW, yOf(this.target + 0.25), plotW, yOf(this.target - 0.25) - yOf(this.target + 0.25));
-      g.strokeStyle = '#f6ad55';
-      g.beginPath(); g.moveTo(labelW, yOf(this.target)); g.lineTo(w, yOf(this.target)); g.stroke();
-    }
-    g.lineWidth = 3;
-    g.lineCap = 'round';
-    let prev = null;
-    for (const p of this.points) {
-      if (p.midi === null) { prev = null; continue; }
-      const x = labelW + plotW * (1 - (now - p.time) / this.seconds), y = yOf(p.midi);
-      if (prev && p.time - prev.time < 0.2) {
-        const c = this.target === null ? 0 : Math.abs(p.midi - this.target) * 100;
-        g.strokeStyle = c <= 25 ? '#4fd1a5' : c <= 60 ? '#f6ad55' : '#fc8181';
-        g.beginPath(); g.moveTo(prev.x, prev.y); g.lineTo(x, y); g.stroke();
-      }
-      prev = { x, y, time: p.time };
-    }
-    g.lineWidth = 1;
-  }
-}
-
-function fillSelect(select, entries, selected) {
-  select.innerHTML = entries.map(([value, text]) => `<option value="${value}">${text}</option>`).join('');
-  if (selected !== undefined) select.value = String(selected);
-}
-
-// ===================== Settings UI =====================
-$('a4').value = store.get('a4', 440);
-$('gate').value = store.get('gate', -55);
-$('gateVal').textContent = $('gate').value + ' dB';
-$('a4').addEventListener('change', () => store.set('a4', a4()));
-$('gate').addEventListener('input', () => {
-  $('gateVal').textContent = $('gate').value + ' dB';
-  store.set('gate', Number($('gate').value));
-});
-$('toggle').addEventListener('click', () => (mic.analyser ? stopMic() : startMic()));
-
-let tuningKey = store.get('tuning', 'standard');
-if (!TUNINGS[tuningKey]) tuningKey = 'standard';
-document.querySelectorAll('.tuning-select').forEach(sel => {
-  fillSelect(sel, Object.entries(TUNINGS).map(([k, t]) => [k, t.name]), tuningKey);
-  sel.addEventListener('change', () => {
-    tuningKey = sel.value;
-    store.set('tuning', tuningKey);
-    document.querySelectorAll('.tuning-select').forEach(s => { s.value = tuningKey; });
-    tuner.reset();
-    fretboard.redraw();
-  });
-});
-
-// ===================== Detect tab =====================
-const detect = (() => {
-  const fills = NOTE_NAMES.map(name => {
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-    bar.innerHTML = `<div class="fill"></div><div class="lbl">${name}</div>`;
-    $('detChroma').appendChild(bar);
-    return bar.firstChild;
-  });
-  let history = [];
-  let lastSoundAt = 0;
-
-  function clear() {
-    history = [];
-    $('detKind').textContent = '';
-    $('detResult').textContent = '–';
-    $('detResult').classList.remove('stale');
-    $('detSub').textContent = '';
-    $('detDiagram').innerHTML = '';
-    $('detTunerNote').textContent = '–';
-    $('detTunerInfo').textContent = '';
-    setNeedle($('detNeedle'), 0);
-    $('detChips').innerHTML = '';
-  }
-
-  function renderChroma(members) {
-    const max = Math.max(...chroma) || 1;
-    fills.forEach((fill, pc) => {
-      fill.style.height = (100 * chroma[pc] / max).toFixed(1) + '%';
-      fill.classList.toggle('in-chord', !!members && members.has(pc));
-    });
-  }
-
-  function renderTuner(pitch) {
-    if (!pitch || pitch.clarity < 0.8) return;
-    const info = noteInfo(pitch.freq);
-    $('detTunerNote').textContent = info.name + info.octave;
-    setNeedle($('detNeedle'), info.cents);
-    const stringIdx = STANDARD.indexOf(info.midi);
-    const stringName = stringIdx >= 0 ? ' · open ' + stringLabel(stringIdx) : '';
-    $('detTunerInfo').textContent = `${pitch.freq.toFixed(1)} Hz · ${fmtCents(info.cents)}${stringName}`;
-  }
-
-  function renderChips(notes) {
-    $('detChips').innerHTML = notes.map((n, i) =>
-      `<span class="chip${i === 0 ? ' bass' : ''}" title="${n.freq.toFixed(1)} Hz">${noteName(freqToMidi(n.freq))}</span>`).join('');
-  }
-
-  // Shows a result only after it wins most of the recent frames.
-  function vote(candidate) {
-    history.push(candidate);
-    if (history.length > HISTORY_LEN) history.shift();
-    const counts = new Map();
-    for (const c of history) if (c) counts.set(c.label, (counts.get(c.label) || 0) + 1);
-    let winner = null, winnerCount = 0;
-    for (const [label, count] of counts) if (count > winnerCount) { winner = label; winnerCount = count; }
-    if (!winner || winnerCount < Math.min(3, history.length)) return;
-    const latest = history.findLast(c => c && c.label === winner);
-    $('detKind').textContent = latest.kind;
-    $('detResult').textContent = latest.label;
-    $('detSub').textContent = latest.sub;
-    const shape = latest.kind === 'Chord' ? CHORD_SHAPES[latest.label.split('/')[0]] : null;
-    $('detDiagram').innerHTML = shape ? chordDiagramSvg(shape) : '';
-  }
-
-  return {
-    needsSpectrum: true,
-    onFrame(f) {
-      drawSpectrum($('detSpectrum'), f.spectrum, f.peaks);
-      if (!f.audible || !f.peaks.length) {
-        renderChroma(null);
-        if (f.time - lastSoundAt > HOLD_SEC) clear();
-        else $('detResult').classList.add('stale');
-        return;
-      }
-      lastSoundAt = f.time;
-      $('detResult').classList.remove('stale');
-      if (f.chromaReset) history = [];
-      renderTuner(f.pitch);
-      renderChips(f.notes);
-
-      const chromaMax = Math.max(...chroma) || 1;
-      const activeCount = chroma.filter(v => v / chromaMax > 0.25).length;
-      const mode = $('detMode').value;
-      const chord = mode === 'note' ? null : matchChord(chroma, f.bassPc);
-      const isClearNote = f.pitch && f.pitch.clarity >= 0.95 && activeCount <= 2;
-
-      let candidate = null;
-      if (chord && (mode === 'chord' || !isClearNote)) {
-        candidate = { kind: 'Chord', label: chord.label, sub: chord.description, members: chord.members };
-      } else if (mode !== 'chord') {
-        const freq = f.pitch && f.pitch.clarity > 0.8 ? f.pitch.freq : f.notes[0]?.freq;
-        if (freq) {
-          const info = noteInfo(freq);
-          candidate = { kind: 'Single note', label: info.name + info.octave, sub: `${freq.toFixed(1)} Hz` };
-        }
-      }
-      renderChroma(candidate?.members ?? null);
-      vote(candidate);
-    },
-  };
-})();
-
-function drawSpectrum(canvas, spectrum, peaks) {
-  const { g, w, h } = prepCanvas(canvas);
-  const fLo = 60, fHi = 2000, dbLo = -110, dbHi = -10;
-  const xOf = f => w * Math.log(f / fLo) / Math.log(fHi / fLo);
-  const yOf = db => h * (1 - (Math.max(dbLo, Math.min(dbHi, db)) - dbLo) / (dbHi - dbLo));
-
-  // Grid lines at the open strings, A4 and its octaves.
-  g.strokeStyle = '#2a2f3a';
-  g.fillStyle = '#8a90a0';
-  g.font = '11px system-ui';
-  g.lineWidth = 1;
-  for (const f of [82.4, 110, 146.8, 196, 246.9, 329.6, 440, 880, 1760]) {
-    const x = xOf(f);
-    g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
-    g.fillText(f < 1000 ? Math.round(f) : (f / 1000).toFixed(2) + 'k', x + 3, h - 4);
-  }
-  if (!spectrum || !mic.analyser) return;
-
-  const binHz = audioCtx.sampleRate / mic.analyser.fftSize;
-  g.strokeStyle = '#4fd1a5';
-  g.lineWidth = 1.5;
-  g.beginPath();
-  let started = false;
-  for (let i = Math.floor(fLo / binHz); i <= Math.ceil(fHi / binHz) && i < spectrum.length; i++) {
-    const x = xOf(i * binHz), y = yOf(spectrum[i]);
-    if (started) g.lineTo(x, y); else { g.moveTo(x, y); started = true; }
-  }
-  g.stroke();
-
-  g.fillStyle = '#f6ad55';
-  for (const p of peaks) {
-    if (p.freq < fLo || p.freq > fHi) continue;
-    g.beginPath();
-    g.arc(xOf(p.freq), yOf(p.db), 3, 0, Math.PI * 2);
-    g.fill();
-  }
-}
-
-// ===================== Tuner tab =====================
-const tuner = (() => {
-  let current = 0;
-  let done = new Set();
-  let inTuneSince = null;
-  const strings = () => TUNINGS[tuningKey].midis;
-  const guided = () => document.querySelector('input[name=tunMode]:checked').value === 'guided';
-  const hint = (text, cls) => setFeedback($('tunHint'), text, cls);
-
-  function renderStrings() {
-    const box = $('tunStrings');
-    box.innerHTML = '';
-    strings().forEach((m, i) => {
-      const b = document.createElement('button');
-      b.className = 'secondary string-btn' + (done.has(i) ? ' done' : '') + (i === current ? ' current' : '');
-      b.textContent = `${6 - i}: ${noteName(m)}`;
-      b.title = stringLabel(i);
-      b.addEventListener('click', () => {
-        current = i;
-        inTuneSince = null;
-        document.querySelector('input[name=tunMode][value=guided]').checked = true;
-        renderStrings();
-      });
-      box.appendChild(b);
-    });
-  }
-
-  function reset() {
-    current = 0;
-    done = new Set();
-    inTuneSince = null;
-    renderStrings();
-    hint('');
-  }
-
-  $('tunReset').addEventListener('click', reset);
-  $('tunRef').addEventListener('click', () => playNote(strings()[current], { dur: 2.5 }));
-  renderStrings();
-
-  return {
-    reset,
-    onFrame(f) {
-      const ms = strings();
-      const m = f.smoothMidi;
-      if (done.size === ms.length) { hint('All strings are in tune.', 'good'); return; }
-      if (m === null) {
-        inTuneSince = null;
-        if (!f.muted) hint(guided() ? `Play the ${stringLabel(current)} (${noteName(ms[current])}) on its own.` : 'Play any open string.');
-        return;
-      }
-      if (!guided()) {
-        let best = 0;
-        ms.forEach((sm, i) => { if (Math.abs(m - sm) < Math.abs(m - ms[best])) best = i; });
-        if (best !== current) { current = best; renderStrings(); }
-      }
-      const target = ms[current];
-      let cents = (m - target) * 100;
-      if (Math.abs(cents) > 600) cents = ((cents % 1200) + 1800) % 1200 - 600;   // octave error from the pitch tracker
-      $('tunNote').textContent = noteName(target);
-      setNeedle($('tunNeedle'), cents);
-      $('tunInfo').textContent = `${stringLabel(current)} · you play ${f.pitch.freq.toFixed(1)} Hz · target ${midiToFreq(target).toFixed(1)} Hz · ${fmtCents(cents)}`;
-
-      if (guided() && Math.abs(cents) > 300) {
-        inTuneSince = null;
-        hint(`That sounds like another string. Play the ${stringLabel(current)} (${noteName(target)}).`, 'warn');
-        return;
-      }
-      if (Math.abs(cents) <= 5) {
-        if (inTuneSince === null) inTuneSince = f.time;
-        hint('In tune – let it ring…', 'good');
-        if (f.time - inTuneSince >= 1 && !done.has(current)) {
-          done.add(current);
-          inTuneSince = null;
-          if (guided()) {
-            const next = ms.findIndex((_, i) => !done.has(i));
-            if (next >= 0) current = next;
-          }
-          renderStrings();
-        }
-        return;
-      }
-      inTuneSince = null;
-      const semis = Math.round(Math.abs(cents) / 100);
-      const far = semis >= 1 ? ` (about ${semis} semitone${semis > 1 ? 's' : ''})` : '';
-      if (cents < 0) hint(`Too low ↑ Tighten the string${far}`, 'warn');
-      else hint(`Too high ↓ Loosen the string${far}`, 'warn');
-    },
-  };
-})();
-
-// ===================== Chord trainer tab =====================
-const chords = (() => {
-  let current = null;
-  let okFrames = 0;
-  let armed = false;
-  let solved = false;
-  let lastOnset = 0;
-  let nextTimer = 0;
-  const drill = { running: false, endTime: 0, count: 0, pair: ['C', 'G'], idx: 0 };
-  const fb = (text, cls) => setFeedback($('chFeedback'), text, cls);
-
-  fillSelect($('chSet'), Object.entries(CHORD_SETS).map(([k, s]) => [k, s.name]), store.get('chordSet', 'beginner'));
-  const all = Object.keys(CHORD_SHAPES).map(k => [k, k]);
-  fillSelect($('chA'), all, 'C');
-  fillSelect($('chB'), all, 'G');
-
-  function setChord(name) {
-    clearTimeout(nextTimer);
-    current = name;
-    okFrames = 0;
-    solved = false;
-    armed = false;
-    $('chName').textContent = name;
-    $('chDiagram').innerHTML = chordDiagramSvg(CHORD_SHAPES[name]);
-    fb('Strum the chord.');
-    renderNotes(null);
-    $('chHints').innerHTML = '';
-  }
-
-  function next() {
-    const list = CHORD_SETS[$('chSet').value].chords.filter(c => c !== current);
-    setChord(pick(list));
-  }
-
-  function renderNotes(check) {
-    const pcs = [...shapePcs(CHORD_SHAPES[current])];
-    $('chNotes').innerHTML = pcs.map(pc => {
-      const cls = !check ? '' : check.missing.includes(pc) ? ' miss' : ' ok';
-      return `<span class="chip${cls}">${NOTE_NAMES[pc]}</span>`;
-    }).join('');
-  }
-
-  function hintsFor(check) {
-    const shape = CHORD_SHAPES[current];
-    const lines = [];
-    for (const pc of check.missing) {
-      const where = shape.frets
-        .map((f, i) => (f !== X && pcOf(STANDARD[i] + f) === pc ? `${stringLabel(i)}, ${f === 0 ? 'open' : 'fret ' + f}` : null))
-        .filter(Boolean);
-      lines.push(`Missing ${NOTE_NAMES[pc]}: check the ${where.join(' and the ')}. Press firmly just behind the fret and keep other fingers off this string.`);
-    }
-    for (const pc of check.extra) {
-      const muted = shape.frets.map((f, i) => (f === X && pcOf(STANDARD[i]) === pc ? i : -1)).filter(i => i >= 0);
-      if (muted.length) lines.push(`Extra ${NOTE_NAMES[pc]}: do not play the ${muted.map(stringLabel).join(' or the ')}.`);
-      else lines.push(`Extra ${NOTE_NAMES[pc]}: a finger may be on the wrong fret or string.`);
-    }
-    return lines.map(l => `<div>• ${l}</div>`).join('');
-  }
-
-  function success() {
-    solved = true;
-    armed = false;
-    fb('Correct!', 'good');
-    renderNotes({ missing: [] });
-    $('chHints').innerHTML = '';
-    if (drill.running) {
-      drill.count++;
-      drill.idx ^= 1;
-      setChord(drill.pair[drill.idx]);
-      fb(`Correct! Changes: ${drill.count}. Now ${current}.`, 'good');
-    } else if ($('chAuto').checked) {
-      nextTimer = setTimeout(next, 1000);
-    }
-  }
-
-  function finishDrill() {
-    drill.running = false;
-    const key = 'changes.' + drill.pair.join('-');
-    const best = Math.max(store.get(key, 0), drill.count);
-    store.set(key, best);
-    $('chTimer').textContent = '';
-    fb(`Time is up: ${drill.count} changes in 60 seconds. Your best for ${drill.pair.join(' ↔ ')} is ${best}.`, 'good');
-    $('chStart').textContent = 'Start 60 s';
-  }
-
-  $('chSet').addEventListener('change', () => { store.set('chordSet', $('chSet').value); next(); });
-  $('chNext').addEventListener('click', next);
-  $('chHear').addEventListener('click', () => playChord(shapeNotes(CHORD_SHAPES[current]).filter(m => m !== null)));
-  $('chMode').addEventListener('change', () => {
-    const changes = $('chMode').value === 'changes';
-    $('chPractice').hidden = changes;
-    $('chChanges').hidden = !changes;
-    if (drill.running) finishDrill();
-  });
-  $('chStart').addEventListener('click', () => {
-    if (drill.running) { finishDrill(); return; }
-    if (!mic.analyser) { fb('Press "Start listening" first.', 'warn'); return; }
-    drill.pair = [$('chA').value, $('chB').value];
-    drill.count = 0;
-    drill.idx = 0;
-    drill.endTime = performance.now() / 1000 + 60;
-    drill.running = true;
-    $('chStart').textContent = 'Stop';
-    setChord(drill.pair[0]);
-  });
-  setChord('C');
-
-  return {
-    needsSpectrum: true,
-    onFrame(f) {
-      if (drill.running) {
-        const left = drill.endTime - f.time;
-        $('chTimer').textContent = `${Math.ceil(left)} s left · changes: ${drill.count} · best: ${store.get('changes.' + drill.pair.join('-'), 0)}`;
-        if (left <= 0) finishDrill();
-      }
-      if (f.onset !== null) { armed = true; lastOnset = f.time; }
-      if (solved || !armed) return;
-      if (!f.audible || !f.peaks.length) { okFrames = 0; return; }
-      // Wait until the long FFT window shows the new strum.
-      if (f.time - lastOnset < CHROMA_LAG) return;
-
-      const check = checkPitchClasses(chroma, shapePcs(CHORD_SHAPES[current]));
-      renderNotes(check);
-      okFrames = check.ok ? okFrames + 1 : 0;
-      if (okFrames >= 8) { success(); return; }
-      if (!check.ok && f.time - lastOnset > 0.6) {
-        fb('Not quite yet.', 'warn');
-        $('chHints').innerHTML = hintsFor(check);
-      }
-    },
-  };
-})();
-
-// ===================== Fretboard tab =====================
-const fretboard = (() => {
-  const FB = { frets: 15, w: 1000, h: 240, left: 72, right: 16, top: 24, gap: 36 };
-  FB.fretW = (FB.w - FB.left - FB.right) / FB.frets;
-  const fx = fret => (fret === 0 ? FB.left - 24 : FB.left + (fret - 0.5) * FB.fretW);
-  const fy = i => FB.top + (5 - i) * FB.gap;   // i = 0 is the 6th (low) string, drawn at the bottom
-  const tuning = () => TUNINGS[tuningKey].midis;
-
-  const game = { running: false, target: null, score: 0, streak: 0, best: store.get('fretBest', 0) };
-  const hold = new HoldDetector(0.3, 40);
-  let nowNote = null;
-  let revealUntil = 0;
-  const fb = (text, cls) => setFeedback($('fbFeedback'), text, cls);
-
-  function redraw() {
-    const t = tuning();
-    let s = `<svg viewBox="0 0 ${FB.w} ${FB.h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Guitar fretboard">`;
-    const midY = (a, b) => (fy(a) + fy(b)) / 2;
-    for (const f of [3, 5, 7, 9, 15]) s += `<circle cx="${fx(f)}" cy="${midY(2, 3)}" r="7" fill="#2a2f3a"/>`;
-    s += `<circle cx="${fx(12)}" cy="${midY(1, 2)}" r="7" fill="#2a2f3a"/><circle cx="${fx(12)}" cy="${midY(3, 4)}" r="7" fill="#2a2f3a"/>`;
-    for (let f = 0; f <= FB.frets; f++) {
-      const x = FB.left + f * FB.fretW;
-      s += `<line x1="${x}" x2="${x}" y1="${fy(5)}" y2="${fy(0)}" stroke="${f === 0 ? '#e8eaf0' : '#555b69'}" stroke-width="${f === 0 ? 6 : 2}"/>`;
-    }
-    for (let i = 0; i < 6; i++) {
-      s += `<line x1="${FB.left}" x2="${FB.w - FB.right}" y1="${fy(i)}" y2="${fy(i)}" stroke="#b8bcc8" stroke-width="${1 + (5 - i) * 0.35}"/>`;
-      s += `<text x="4" y="${fy(i) + 4}" fill="#8a90a0" font-size="13">${NOTE_NAMES[pcOf(t[i])]}</text>`;
-    }
-    for (const f of [3, 5, 7, 9, 12, 15]) s += `<text x="${fx(f)}" y="${fy(0) + 30}" fill="#8a90a0" font-size="12" text-anchor="middle">${f}</text>`;
-    s += '<g class="fb-all">';
-    for (let i = 0; i < 6; i++) {
-      for (let f = 0; f <= FB.frets; f++) {
-        const pc = pcOf(t[i] + f);
-        s += `<text x="${fx(f)}" y="${fy(i) - 6}" fill="${NATURAL[pc] ? '#8a90a0' : '#555b69'}" font-size="10" text-anchor="middle">${NOTE_NAMES[pc]}</text>`;
-      }
-    }
-    s += '</g><g id="fbMarks"></g></svg>';
-    $('fbBoard').innerHTML = s;
-    marks();
-  }
-
-  function dot(i, f, color, label) {
-    return `<circle cx="${fx(f)}" cy="${fy(i)}" r="13" fill="${color}"/>` +
-      `<text x="${fx(f)}" y="${fy(i) + 4}" fill="#06281d" font-size="11" font-weight="700" text-anchor="middle">${label}</text>`;
-  }
-
-  function marks() {
-    const t = tuning();
-    let s = '';
-    if (nowNote !== null) {
-      for (let i = 0; i < 6; i++) {
-        const f = nowNote - t[i];
-        if (f >= 0 && f <= FB.frets) s += dot(i, f, '#4fd1a5', NOTE_NAMES[pcOf(nowNote)]);
-      }
-    }
-    if (game.target && performance.now() / 1000 < revealUntil) {
-      s += dot(game.target.string, game.target.fret, '#f6ad55', NOTE_NAMES[pcOf(game.target.midi)]);
-    }
-    const g = $('fbMarks');
-    if (g) g.innerHTML = s;
-  }
-
-  function renderStringChecks() {
-    $('fbStrings').innerHTML = [0, 1, 2, 3, 4, 5].map(i =>
-      `<label><input type="checkbox" data-string="${i}" checked> ${6 - i}</label>`).join('');
-  }
-
-  function newTarget() {
-    const strings = [...document.querySelectorAll('#fbStrings input:checked')].map(el => Number(el.dataset.string));
-    if (!strings.length) { fb('Select at least one string.', 'warn'); return; }
-    const t = tuning();
-    const options = [];
-    for (const i of strings) {
-      for (let f = 0; f <= 12; f++) {
-        if (!$('fbNaturals').checked || NATURAL[pcOf(t[i] + f)]) options.push({ string: i, fret: f, midi: t[i] + f });
-      }
-    }
-    let target = pick(options);
-    if (game.target && options.length > 1) {
-      while (target.midi === game.target.midi && target.string === game.target.string) target = pick(options);
-    }
-    game.target = target;
-    hold.reset();
-    $('fbPrompt').textContent = `Play ${NOTE_NAMES[pcOf(target.midi)]} on the ${stringLabel(target.string)}`;
-    fb('');
-    renderScore();
-  }
-
-  function renderScore() {
-    $('fbScore').textContent = `Score: ${game.score} · streak: ${game.streak} · best streak: ${game.best}`;
-  }
-
-  $('fbShowAll').addEventListener('change', () => $('fbBoard').classList.toggle('show-all', $('fbShowAll').checked));
-  $('fbStart').addEventListener('click', () => {
-    if (game.running) {
-      game.running = false;
-      game.target = null;
-      $('fbStart').textContent = 'Start game';
-      $('fbPrompt').textContent = '';
-      fb('');
-      return;
-    }
-    if (!mic.analyser) { fb('Press "Start listening" first.', 'warn'); return; }
-    game.running = true;
-    game.score = 0;
-    game.streak = 0;
-    $('fbStart').textContent = 'Stop game';
-    newTarget();
-  });
-  $('fbSkip').addEventListener('click', () => {
-    if (!game.running) return;
-    game.streak = 0;
-    revealUntil = performance.now() / 1000 + 2;
-    fb(`Here it is: ${stringLabel(game.target.string)}, ${game.target.fret === 0 ? 'open' : 'fret ' + game.target.fret}.`, 'warn');
-    marks();
-    setTimeout(() => game.running && newTarget(), 2000);
-  });
-  renderStringChecks();
-  redraw();
-
-  return {
-    redraw,
-    onFrame(f) {
-      const rounded = f.smoothMidi === null ? null : Math.round(f.smoothMidi);
-      if (rounded !== nowNote) {
-        nowNote = rounded;
-        $('fbNow').textContent = rounded === null ? '–' : noteName(rounded);
-        marks();
-      }
-      if (!game.running || !game.target) return;
-      const held = hold.update(f.time, f.smoothMidi);
-      if (held === null) return;
-      if (held === game.target.midi) {
-        game.score++;
-        game.streak++;
-        if (game.streak > game.best) { game.best = game.streak; store.set('fretBest', game.best); }
-        revealUntil = f.time + 0.8;
-        fb('Correct!', 'good');
-        renderScore();
-        marks();
-        const t = game.target;
-        setTimeout(() => { if (game.running && game.target === t) newTarget(); }, 800);
-      } else if (pcOf(held) === pcOf(game.target.midi)) {
-        game.streak = 0;
-        fb(`Right note name, wrong place. Find it on the ${stringLabel(game.target.string)}.`, 'warn');
-        renderScore();
-      } else {
-        game.streak = 0;
-        fb(`That was ${noteName(held)}. Try again.`, 'badc');
-        renderScore();
-      }
-    },
-  };
-})();
-
-// ===================== Rhythm tab =====================
-const metro = { running: false, timer: 0, nextTime: 0, beatCount: 0, anchor: 0, interval: 0.75, scheduled: [] };
-const bpm = () => Number($('rhBpm').value);
-const beatsPerBar = () => Number($('rhBeats').value);
-
-function metroSchedule() {
-  const ctx = getCtx();
-  while (metro.nextTime < ctx.currentTime + 0.12) {
-    const beat = metro.beatCount % beatsPerBar();
-    playClick(metro.nextTime, $('rhAccent').checked && beat === 0);
-    metro.scheduled.push({ time: metro.nextTime, beat });
-    metro.nextTime += metro.interval;
-    metro.beatCount++;
-  }
-  while (metro.scheduled.length > 16) metro.scheduled.shift();
-}
-
-function metroStart() {
-  const ctx = getCtx();
-  metro.interval = 60 / bpm();
-  metro.nextTime = ctx.currentTime + 0.1;
-  metro.anchor = metro.nextTime;
-  metro.beatCount = 0;
-  metro.scheduled = [];
-  metro.running = true;
-  metroSchedule();
-  metro.timer = setInterval(metroSchedule, 25);
-  $('rhToggle').textContent = 'Stop metronome';
-  $('rhToggle').classList.add('stop');
-}
-
-function metroStop() {
-  clearInterval(metro.timer);
-  metro.running = false;
-  $('rhToggle').textContent = 'Start metronome';
-  $('rhToggle').classList.remove('stop');
-}
-
-const rhythm = (() => {
-  let hits = [];
-  let calibration = null;   // array of raw offsets while calibrating
-  let latency = store.get('latency', 0);
-  let lastBeatShown = -1;
-
-  function renderLatency() {
-    $('rhLatency').textContent = `Microphone delay: ${Math.round(latency * 1000)} ms`;
-  }
-
-  function nearestGrid(t) {
-    const step = metro.interval / Number($('rhSub').value);
-    return metro.anchor + Math.round((t - metro.anchor) / step) * step;
-  }
-
-  function renderDots(active, accent) {
-    const n = beatsPerBar();
-    $('rhBeatDots').innerHTML = Array.from({ length: n }, (_, i) =>
-      `<span class="${i === active ? 'on' : ''}${i === active && accent ? ' accent' : ''}"></span>`).join('');
-  }
-
-  function drawStrip() {
-    const { g, w, h } = prepCanvas($('rhStrip'));
-    const range = 150;
-    const xOf = ms => w / 2 + (Math.max(-range, Math.min(range, ms)) / range) * (w / 2 - 20);
-    g.fillStyle = 'rgba(79,209,165,0.15)';
-    g.fillRect(xOf(-40), 0, xOf(40) - xOf(-40), h);
-    g.strokeStyle = '#e8eaf0';
-    g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.stroke();
-    g.fillStyle = '#8a90a0';
-    g.font = '12px system-ui';
-    g.fillText('early', 8, 16);
-    g.fillText('late', w - 34, 16);
-    g.fillText('on the beat', w / 2 + 6, 16);
-    hits.forEach((hit, idx) => {
-      const age = hits.length - 1 - idx;
-      const y = h - 14 - (age / 20) * (h - 34);
-      const c = Math.abs(hit);
-      g.globalAlpha = 1 - age / 24;
-      g.fillStyle = c <= 40 ? '#4fd1a5' : c <= 80 ? '#f6ad55' : '#fc8181';
-      g.beginPath(); g.arc(xOf(hit), y, age === 0 ? 8 : 5, 0, Math.PI * 2); g.fill();
-    });
-    g.globalAlpha = 1;
-  }
-
-  function renderStats() {
-    if (!hits.length) { $('rhStats').textContent = ''; return; }
-    const onBeat = hits.filter(o => Math.abs(o) <= 40).length;
-    const avg = mean(hits);
-    let tendency = 'You keep good time.';
-    if (avg < -15) tendency = `You tend to rush (play early) by about ${Math.round(-avg)} ms.`;
-    else if (avg > 15) tendency = `You tend to drag (play late) by about ${Math.round(avg)} ms.`;
-    $('rhStats').textContent = `${onBeat} of the last ${hits.length} strums on the beat. ${tendency}`;
-  }
-
-  $('rhToggle').addEventListener('click', () => (metro.running ? metroStop() : metroStart()));
-  $('rhBpm').addEventListener('input', () => {
-    $('rhBpmVal').textContent = bpm();
-    metro.interval = 60 / bpm();
-    if (metro.running) metro.anchor = metro.nextTime;
-    hits = [];
-  });
-  $('rhCalibrate').addEventListener('click', () => {
-    if (!mic.analyser) { $('rhLatency').textContent = 'Press "Start listening" first.'; return; }
-    if (!metro.running) metroStart();
-    calibration = [];
-    $('rhLatency').textContent = 'Calibrating: strum exactly on the next 8 clicks…';
-  });
-  renderLatency();
-  renderDots(-1, false);
-
-  return {
-    onShow() { drawStrip(); },
-    onFrame(f) {
-      if (metro.running && audioCtx) {
-        const now = audioCtx.currentTime;
-        const last = metro.scheduled.filter(b => b.time <= now).pop();
-        const active = last && now - last.time < 0.12 ? last.beat : -1;
-        if (active !== lastBeatShown) {
-          lastBeatShown = active;
-          renderDots(active, active === 0 && $('rhAccent').checked);
-        }
-      } else if (lastBeatShown !== -1) {
-        lastBeatShown = -1;
-        renderDots(-1, false);
-      }
-      drawStrip();
-      if (!metro.running || f.onset === null) return;
-
-      if (calibration) {
-        calibration.push((f.onset - nearestGrid(f.onset)) * 1000);
-        $('rhLatency').textContent = `Calibrating: ${calibration.length} of 8…`;
-        if (calibration.length >= 8) {
-          latency = Math.max(0, median(calibration) / 1000);
-          store.set('latency', latency);
-          calibration = null;
-          hits = [];
-          renderLatency();
-        }
-        return;
-      }
-      const t = f.onset - latency;
-      const off = (t - nearestGrid(t)) * 1000;
-      hits.push(off);
-      if (hits.length > 20) hits.shift();
-      const text = Math.abs(off) <= 40 ? 'On the beat' : off < 0 ? `${Math.round(-off)} ms early` : `${Math.round(off)} ms late`;
-      setFeedback($('rhLast'), text, Math.abs(off) <= 40 ? 'good' : Math.abs(off) <= 80 ? 'warn' : 'badc');
-      renderStats();
-    },
-  };
-})();
-
-// ===================== Pitch trace tab =====================
-const trace = (() => {
-  const pt = new PitchTrace($('trCanvas'), 10, 18);
-  let paused = false;
-  let pausedAt = 0;
-  const recent = [];
-
-  $('trPause').addEventListener('click', () => {
-    paused = !paused;
-    pausedAt = performance.now() / 1000;
-    $('trPause').textContent = paused ? 'Resume' : 'Pause';
-  });
-
-  return {
-    onFrame(f) {
-      if (paused) { pt.draw(pausedAt); return; }
-      pt.push(f.time, f.smoothMidi);
-      pt.draw(f.time);
-      const m = f.smoothMidi;
-      if (m === null) { recent.length = 0; return; }
-      const n = Math.round(m);
-      const cents = (m - n) * 100;
-      $('trNote').textContent = noteName(n);
-      $('trInfo').textContent = `${f.pitch.freq.toFixed(1)} Hz · ${fmtCents(cents)}`;
-      if (recent.length && recent[0].note !== n) recent.length = 0;
-      recent.push({ note: n, cents });
-      if (recent.length > 60) recent.shift();
-      if (recent.length >= 20) {
-        const sd = stdDev(recent.map(r => r.cents));
-        const word = sd < 8 ? 'very steady' : sd < 20 ? 'fairly steady' : 'wobbly';
-        $('trStats').textContent = `Steadiness on ${noteName(n)}: ±${Math.round(sd)} cents (${word}).`;
-      }
-    },
-  };
-})();
-
-// ===================== Sing tab =====================
-const sing = (() => {
-  const pt = new PitchTrace($('sgCanvas'), 8, 14);
-  const HOLD_TARGET = 2;
-  const s = { phase: 'idle', targets: [], i: 0, refEnds: 0, listenStart: 0, inZoneSince: null, lastInZone: 0, errors: [], firstHit: null, pauseUntil: 0, results: [] };
-  const fb = (text, cls) => setFeedback($('sgFeedback'), text, cls);
-  const savedRange = () => store.get('range', null);
-
-  function fillRoots() {
-    const r = savedRange();
-    const def = r ? Math.min(r.high - 12, r.low + 2) : 57;
-    fillSelect($('sgRoot'), Array.from({ length: 37 }, (_, k) => [40 + k, noteName(40 + k)]), Math.max(40, Math.min(76, def)));
-  }
-
-  function buildTargets() {
-    const root = Number($('sgRoot').value);
-    const ex = $('sgExercise').value;
-    if (ex === 'scale') return [0, 2, 4, 5, 7, 9, 11, 12, 11, 9, 7, 5, 4, 2, 0].map(i => root + i);
-    if (ex === 'arpeggio') return [0, 4, 7, 12, 7, 4, 0].map(i => root + i);
-    const r = savedRange();
-    const lo = r ? r.low + 1 : root, hi = r ? r.high - 1 : root + 12;
-    return Array.from({ length: 8 }, () => randInt(lo, Math.max(lo, hi)));
-  }
-
-  function resetZone() { s.inZoneSince = null; s.errors = []; $('sgHold').style.width = '0%'; }
-
-  function playRef() {
-    const target = s.targets[s.i];
-    const secs = playNote(target, { dur: 1.5, sustain: true });
-    s.phase = 'reference';
-    s.refEnds = performance.now() / 1000 + secs + 0.3;
-    $('sgTarget').textContent = noteName(target);
-    $('sgProgress').textContent = `Note ${s.i + 1} of ${s.targets.length}`;
-    fb('Listen…');
-    resetZone();
-  }
-
-  function finishNote(time, skipped) {
-    const target = s.targets[s.i];
-    if (skipped) {
-      s.results.push({ target, skipped: true });
-      fb('Skipped.', 'warn');
-    } else {
-      const avg = mean(s.errors.map(Math.abs));
-      const sd = stdDev(s.errors);
-      const score = Math.max(0, Math.min(100, Math.round(100 - avg * 1.5 - sd - Math.max(0, s.firstHit - 1) * 5)));
-      s.results.push({ target, avg, sd, found: s.firstHit, score });
-      fb(`Well done! ${Math.round(avg)} cents off on average.`, 'good');
-    }
-    renderResults();
-    s.phase = 'pause';
-    s.pauseUntil = time + 1;
-  }
-
-  function nextNote() {
-    s.i++;
-    if (s.i >= s.targets.length) {
-      s.phase = 'done';
-      const scored = s.results.filter(r => !r.skipped);
-      const overall = scored.length ? Math.round(mean(scored.map(r => r.score))) : 0;
-      fb(`Finished! Overall score: ${overall} / 100.`, 'good');
-      $('sgTarget').textContent = '–';
-      $('sgStart').textContent = 'Start';
-      return;
-    }
-    playRef();
-  }
-
-  function renderResults() {
-    if (!s.results.length) { $('sgResults').innerHTML = ''; return; }
-    const rows = s.results.map(r => r.skipped
-      ? `<tr><td>${noteName(r.target)}</td><td colspan="4">skipped</td></tr>`
-      : `<tr><td>${noteName(r.target)}</td><td>${Math.round(r.avg)} cents</td><td>±${Math.round(r.sd)} cents</td><td>${r.found.toFixed(1)} s</td><td>${r.score}</td></tr>`).join('');
-    $('sgResults').innerHTML = `<table class="results"><tr><th>Note</th><th>Average error</th><th>Steadiness</th><th>Time to find</th><th>Score</th></tr>${rows}</table>`;
-  }
-
-  $('sgStart').addEventListener('click', () => {
-    if (s.phase !== 'idle' && s.phase !== 'done') {
-      s.phase = 'idle';
-      $('sgStart').textContent = 'Start';
-      fb('Stopped.');
-      return;
-    }
-    if (!mic.analyser) { fb('Press "Start listening" first.', 'warn'); return; }
-    s.targets = buildTargets();
-    s.i = 0;
-    s.results = [];
-    renderResults();
-    $('sgStart').textContent = 'Stop';
-    playRef();
-  });
-  $('sgReplay').addEventListener('click', () => { if (s.phase === 'listening' || s.phase === 'reference') playRef(); });
-  $('sgSkip').addEventListener('click', () => { if (s.phase === 'listening' || s.phase === 'reference') finishNote(performance.now() / 1000, true); });
-  fillRoots();
-
-  return {
-    onShow: fillRoots,
-    onFrame(f) {
-      const active = ['reference', 'listening', 'pause'].includes(s.phase);
-      const target = active ? s.targets[s.i] : null;
-      const m = f.smoothMidi;
-      const shown = target !== null && m !== null && $('sgAnyOctave').checked ? foldToOctave(m, target) : target;
-      pt.setTarget(shown);
-      pt.push(f.time, m);
-      pt.draw(f.time);
-
-      if (s.phase === 'pause' && f.time >= s.pauseUntil) { nextNote(); return; }
-      if (s.phase === 'reference' && f.time >= s.refEnds) {
-        s.phase = 'listening';
-        s.listenStart = f.time;
-        s.firstHit = null;
-        resetZone();
-        fb('Your turn: sing the note.');
-      }
-      if (s.phase !== 'listening') return;
-      if (f.time - s.listenStart > 15) { finishNote(f.time, true); return; }
-      if (m === null) {
-        if (s.inZoneSince !== null && f.time - s.lastInZone > 0.25) resetZone();
-        return;
-      }
-      const cents = (m - shown) * 100;
-      if (Math.abs(cents) <= 25) {
-        if (s.inZoneSince === null) {
-          s.inZoneSince = f.time;
-          if (s.firstHit === null) s.firstHit = f.time - s.listenStart;
-        }
-        s.lastInZone = f.time;
-        s.errors.push(cents);
-        const held = f.time - s.inZoneSince;
-        $('sgHold').style.width = Math.min(100, (100 * held) / HOLD_TARGET) + '%';
-        fb('Good – hold it…', 'good');
-        if (held >= HOLD_TARGET) finishNote(f.time, false);
-      } else {
-        if (s.inZoneSince !== null && f.time - s.lastInZone > 0.25) resetZone();
-        const semis = Math.round(Math.abs(cents) / 100);
-        const far = semis >= 2 ? ` (about ${semis} semitones)` : '';
-        fb(cents < 0 ? `Too low ↑ Go up${far}` : `Too high ↓ Go down${far}`, 'warn');
-      }
-    },
-  };
-})();
-
-// ===================== Vocal range tab =====================
-const range = (() => {
-  const hold = new HoldDetector(0.5, 50);
-  let listening = false;
-  const saved = store.get('range', null);
-  let low = saved ? saved.low : null;
-  let high = saved ? saved.high : null;
-  let now = null;
-
-  function render() {
-    $('rgLow').textContent = low === null ? '–' : noteName(low);
-    $('rgHigh').textContent = high === null ? '–' : noteName(high);
-    $('rgKeyboard').innerHTML = keyboardSvg(36, 84, low, high, now);
-    if (low !== null && high !== null && high > low) {
-      const semis = high - low;
-      $('rgSummary').textContent = `Your range: ${noteName(low)} – ${noteName(high)} (${semis} semitones, ${(semis / 12).toFixed(1)} octaves).`;
-      $('rgVoices').innerHTML = '<h2 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Overlap with reference voice ranges</h2>' +
-        VOICE_RANGES.map(v => {
-          const overlap = Math.max(0, Math.min(high, v.high) - Math.max(low, v.low));
-          const pct = Math.round((100 * overlap) / (v.high - v.low));
-          return `<div class="vrow"><span>${v.name} <small class="sub">${noteName(v.low)}–${noteName(v.high)}</small></span><div class="vbar"><div style="width:${pct}%"></div></div><span>${pct}%</span></div>`;
-        }).join('');
-    } else {
-      $('rgSummary').textContent = '';
-      $('rgVoices').innerHTML = '';
-    }
-  }
-
-  const nudge = (which, d) => () => {
-    if (which === 'low' && low !== null) low += d;
-    if (which === 'high' && high !== null) high += d;
-    render();
-  };
-  $('rgLowDown').addEventListener('click', nudge('low', -1));
-  $('rgLowUp').addEventListener('click', nudge('low', 1));
-  $('rgHighDown').addEventListener('click', nudge('high', -1));
-  $('rgHighUp').addEventListener('click', nudge('high', 1));
-  $('rgStart').addEventListener('click', () => {
-    if (!mic.analyser) { $('rgSummary').textContent = 'Press "Start listening" first.'; return; }
-    listening = !listening;
-    hold.reset();
-    $('rgStart').textContent = listening ? 'Stop' : 'Start';
-  });
-  $('rgReset').addEventListener('click', () => { low = high = null; render(); });
-  $('rgSave').addEventListener('click', () => {
-    if (low === null || high === null || high <= low) { $('rgSummary').textContent = 'Sing a low note and a high note first.'; return; }
-    store.set('range', { low, high });
-    $('rgSummary').textContent += ' Saved.';
-  });
-  render();
-
-  return {
-    onFrame(f) {
-      const rounded = f.smoothMidi === null ? null : Math.round(f.smoothMidi);
-      if (rounded !== now) {
-        now = rounded;
-        $('rgNow').textContent = now === null ? '–' : noteName(now);
-        render();
-      }
-      if (!listening) return;
-      const held = hold.update(f.time, f.smoothMidi);
-      if (held === null) return;
-      if (low === null || held < low) low = held;
-      if (high === null || held > high) high = held;
-      render();
-    },
-  };
-})();
-
-// ===================== Ear training tab =====================
-const ear = (() => {
-  const hold = new HoldDetector(0.4, 50);
-  let q = null;
-  let stage = 0;
-  let firstSung = null;
-  let okFrames = 0;
-  let pendingOnset = null;
-  const score = { right: 0, total: 0, streak: 0 };
-  const fb = (text, cls) => setFeedback($('erFeedback'), text, cls);
-  const level = () => $('erLevel').value;
-  const echo = () => $('erAnswer').value === 'echo';
-  const easy = () => $('erDifficulty').value === 'easy';
-
-  function noteRange() {
-    const r = store.get('range', null);
-    return r ? [r.low + 1, r.high - 1] : [48, 67];
-  }
-
-  function play() {
-    if (!q) return;
-    if (q.level === 'chord') playChord(q.notes, { dur: 2 });
-    else if (q.level === 'interval') { playNote(q.notes[0], { dur: 0.9 }); playNote(q.notes[1], { dur: 0.9, when: 1 }); }
-    else if (!echo()) { playNote(q.ref, { dur: 0.8 }); playNote(q.notes[0], { dur: 1, when: 1 }); }
-    else playNote(q.notes[0], { dur: 1.2, sustain: true });
-    hold.reset();
-    stage = 0;
-    okFrames = 0;
-    pendingOnset = null;
-  }
-
-  function newQuestion() {
-    const [lo, hi] = noteRange();
-    const lv = level();
-    if (lv === 'note') {
-      let m = randInt(lo, hi);
-      while (easy() && !NATURAL[pcOf(m)]) m = randInt(lo, hi);
-      q = { level: lv, notes: [m], ref: m - pcOf(m), answer: NOTE_NAMES[pcOf(m)] };
-      q.options = NOTE_NAMES.filter((_, pc) => !easy() || NATURAL[pc]);
-      $('erPrompt').textContent = echo() ? 'Sing or play the note back.' : 'First you hear a C, then the mystery note. Which note is it?';
-    } else if (lv === 'interval') {
-      const set = easy() ? [2, 4, 5, 7, 12] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-      const semis = pick(set);
-      const root = randInt(lo, Math.max(lo, hi - semis));
-      q = { level: lv, notes: [root, root + semis], semis, answer: INTERVALS[semis], options: set.map(i => INTERVALS[i]) };
-      $('erPrompt').textContent = echo() ? 'Sing or play both notes back: first the low note, then the high note.' : 'Which interval is it?';
-    } else {
-      const names = easy() ? ['', 'm'] : ['', 'm', '7', 'maj7', 'm7', 'dim', 'aug', 'sus4'];
-      const type = CHORD_TYPES.find(t => t.suffix === pick(names));
-      const root = randInt(48, 57);
-      q = {
-        level: lv, notes: [...type.intervals.map(i => root + i), root + 12], pcs: new Set(type.intervals.map(i => (root + i) % 12)),
-        answer: type.name, label: NOTE_NAMES[pcOf(root)] + type.suffix, options: names.map(n => CHORD_TYPES.find(t => t.suffix === n).name),
-      };
-      $('erPrompt').textContent = echo() ? 'Play the same chord back on the guitar.' : 'Which type of chord is it?';
-    }
-    q.firstTry = true;
-    q.solved = false;
-    $('erAnswers').innerHTML = echo() ? '' : q.options.map(o => `<button class="secondary" data-answer="${o}">${o}</button>`).join('');
-    fb('');
-    play();
-  }
-
-  function grade(correct, text) {
-    if (!q || q.solved) return;
-    if (q.firstTry) {
-      score.total++;
-      if (correct) { score.right++; score.streak++; } else score.streak = 0;
-      const key = 'earBest.' + q.level;
-      if (score.streak > store.get(key, 0)) store.set(key, score.streak);
-      q.firstTry = false;
-    }
-    if (correct) q.solved = true;
-    fb(text, correct ? 'good' : 'badc');
-    renderScore();
-  }
-
-  function answerText() {
-    if (q.level === 'note') return noteName(q.notes[0]);
-    if (q.level === 'interval') return `${q.answer} (${noteName(q.notes[0])} → ${noteName(q.notes[1])})`;
-    return `${q.answer} (${q.label})`;
-  }
-
-  function renderScore() {
-    $('erScore').textContent = `Score: ${score.right} / ${score.total} · streak: ${score.streak} · best streak: ${store.get('earBest.' + level(), 0)}`;
-  }
-
-  $('erNew').addEventListener('click', () => {
-    if (echo() && !mic.analyser) { fb('Press "Start listening" first, or answer by choosing the name.', 'warn'); return; }
-    newQuestion();
-  });
-  $('erReplay').addEventListener('click', play);
-  $('erReveal').addEventListener('click', () => {
-    if (!q) return;
-    grade(false, `The answer: ${answerText()}.`);
-    q.solved = true;
-  });
-  $('erAnswers').addEventListener('click', e => {
-    const btn = e.target.closest('button[data-answer]');
-    if (!btn || !q) return;
-    const correct = btn.dataset.answer === q.answer;
-    grade(correct, correct ? `Correct! ${answerText()}.` : 'Not quite. Try again, or press "Show answer".');
-  });
-  ['erLevel', 'erDifficulty', 'erAnswer'].forEach(id => $(id).addEventListener('change', () => { q = null; $('erAnswers').innerHTML = ''; $('erPrompt').textContent = 'Press "New question".'; renderScore(); }));
-  $('erPrompt').textContent = 'Press "New question".';
-  renderScore();
-
-  return {
-    needsSpectrum: () => level() === 'chord' && echo(),
-    onFrame(f) {
-      if (!q || q.solved || !echo()) return;
-      if (q.level === 'chord') {
-        if (f.onset !== null) { pendingOnset = f.time; okFrames = 0; }
-        if (pendingOnset === null || f.time - pendingOnset < CHROMA_LAG || !f.audible) return;
-        const check = checkPitchClasses(chroma, q.pcs);
-        okFrames = check.ok ? okFrames + 1 : 0;
-        if (okFrames >= 8) grade(true, `Correct! ${answerText()}.`);
-        else if (f.time - pendingOnset > 1.2) {
-          const heard = matchChord(chroma, f.bassPc);
-          grade(false, heard ? `You played ${heard.label}. Listen again and try once more.` : 'That was not the same chord. Listen again and try once more.');
-          pendingOnset = null;
-        }
-        return;
-      }
-      const held = hold.update(f.time, f.smoothMidi);
-      if (held === null) return;
-      if (q.level === 'note') {
-        if (pcOf(held) === pcOf(q.notes[0])) grade(true, `Correct! It was ${NOTE_NAMES[pcOf(held)]}.`);
-        else grade(false, `You sang ${NOTE_NAMES[pcOf(held)]}. Listen again and try once more.`);
-        return;
-      }
-      if (stage === 0) {
-        if (pcOf(held) === pcOf(q.notes[0])) { stage = 1; firstSung = held; fb('Good. Now the second note.', 'good'); }
-        else grade(false, `The first note was not ${NOTE_NAMES[pcOf(held)]}. Listen again.`);
-        return;
-      }
-      const sungInterval = held - firstSung;
-      if (sungInterval === q.semis) grade(true, `Correct! ${answerText()}.`);
-      else {
-        const name = Math.abs(sungInterval) <= 12 ? INTERVALS[Math.abs(sungInterval)].toLowerCase() : 'larger interval';
-        grade(false, `You sang a ${name}${sungInterval < 0 ? ' down' : ''}. Try again from the first note.`);
-        stage = 0;
-      }
-    },
-  };
-})();
-
-// ===================== Tabs and main loop =====================
-const modules = { detect, tuner, chords, fretboard, rhythm, trace, sing, range, ear };
-let activeTab = store.get('tab', 'detect');
-if (!modules[activeTab]) activeTab = 'detect';
-
-function showTab(name) {
-  modules[activeTab].onHide?.();
-  activeTab = name;
-  store.set('tab', name);
-  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
-  modules[name].onShow?.();
-}
-$('tabs').addEventListener('click', e => {
-  const btn = e.target.closest('button[data-tab]');
-  if (btn) showTab(btn.dataset.tab);
-});
-showTab(activeTab);
-
-function loop() {
-  requestAnimationFrame(loop);
-  const mod = modules[activeTab];
-  const wantSpectrum = typeof mod.needsSpectrum === 'function' ? mod.needsSpectrum() : !!mod.needsSpectrum;
-  const frame = analyse(wantSpectrum);
-  frame.smoothMidi = smoothMidi(frame.midi);
-  $('level').style.width = Math.max(0, Math.min(100, (frame.levelDb + 80) * 1.4)) + '%';
-  mod.onFrame(frame);
-}
-requestAnimationFrame(loop);
-</script>
 </body>
 </html>
