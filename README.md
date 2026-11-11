@@ -1,4 +1,4 @@
-# Guitar & Voice Trainer
+# Laulu
 
 A guitar and voice practice app that runs entirely in the browser. The interface is in Finnish and uses Nordic note names (H = B, B = B♭), as in Finnish songbooks. There is no backend: audio is analysed with the Web Audio API on your device, and settings and scores are kept in `localStorage`.
 
